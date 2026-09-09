@@ -1,0 +1,19 @@
+# Dependencies
+node_modules/
+client/node_modules/
+server/node_modules/
+
+# Environment Variables & Secrets
+.env
+server/.env
+*.env.local
+
+# Build output
+client/dist/
+client/build/
+
+# IDE & OS
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

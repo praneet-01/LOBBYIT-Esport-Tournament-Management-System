@@ -154,7 +154,7 @@ export default function Home() {
           <div className="pt-8 grid grid-cols-2 md:grid-cols-4 gap-3 max-w-3xl mx-auto">
             <div className="h-24 rounded-xl bg-white border border-slate-200 shadow-sm flex flex-col items-center justify-center text-center px-2">
               <p className="text-xl font-extrabold text-slate-900 font-heading">
-                100%
+                100 %
               </p>
               <p className="text-[11px] text-slate-500 font-medium">
                 Free Tournament Hosting

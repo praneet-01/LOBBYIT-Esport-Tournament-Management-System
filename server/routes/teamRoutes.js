@@ -9,9 +9,9 @@ const {
 const { protect } = require('../middleware/auth');
 const { authorize } = require('../middleware/role');
 
-router.get('/me', protect, authorize('Team'), getMyTeam);
-router.post('/', protect, authorize('Team'), createTeam);
+router.get('/me', protect, authorize('Player', 'Team'), getMyTeam);
+router.post('/', protect, authorize('Player', 'Team'), createTeam);
 router.get('/:id', getTeamById);
-router.put('/:id', protect, authorize('Team'), updateTeam);
+router.put('/:id', protect, authorize('Player', 'Team'), updateTeam);
 
 module.exports = router;

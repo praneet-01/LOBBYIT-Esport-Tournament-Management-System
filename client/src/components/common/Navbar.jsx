@@ -1,144 +1,221 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { Gamepad2, Shield, Users, LogOut, Menu, X, PlusCircle, User } from 'lucide-react';
+import { 
+  Shield, 
+  Users, 
+  LogOut, 
+  Menu, 
+  X, 
+  PlusCircle, 
+  User, 
+  Trophy, 
+  Gamepad2, 
+  ChevronDown
+} from 'lucide-react';
 
 export default function Navbar() {
-  const { user, logout, isOrganizer } = useAuth();
+  const { user, logout, isOrganizer, isTeam, isPlayer } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [userDropdownOpen, setUserDropdownOpen] = useState(false);
 
   const handleLogout = () => {
     logout();
     navigate('/');
+    setUserDropdownOpen(false);
+    setMobileOpen(false);
   };
 
   const isActive = (path) => location.pathname === path;
 
   return (
-    <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-xs">
+    <header className="sticky top-0 z-50 bg-black border-b border-white/10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16 sm:h-20">
+        <div className="flex items-center justify-between h-18 sm:h-20">
           
-          {/* Brand Logo */}
-          <Link to="/" className="flex items-center gap-3 group">
-            <div className="w-10 h-10 rounded-xl bg-violet-600 flex items-center justify-center shadow-sm group-hover:bg-violet-700 transition-all duration-300">
-              <Gamepad2 className="w-6 h-6 text-white" />
-            </div>
-            <div className="flex flex-col">
-              <span className="text-xl sm:text-2xl font-extrabold tracking-tight text-slate-900 font-sans">
-                LOBBY<span className="text-violet-600">IT</span>
-              </span>
-              <span className="text-[10px] tracking-widest text-slate-500 font-bold uppercase -mt-1">
-                Esports Hub
-              </span>
-            </div>
+          {/* Brand Logo - 100% transparent PNG with unified navbar background */}
+          <Link to="/" className="flex items-center group py-2">
+            <img 
+              src="/images/lobbyit-logo-transparent.png" 
+              alt="LOBBYIT" 
+              className="h-8 sm:h-9 w-auto object-contain transition-transform group-hover:scale-102" 
+              onError={(e) => {
+                e.currentTarget.src = '/images/lobbyit-icon.png';
+              }}
+            />
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-8 text-sm font-medium">
+          <nav className="hidden md:flex items-center gap-1 lg:gap-2">
             <Link
               to="/"
-              className={`transition-colors ${isActive('/') ? 'text-violet-700 font-bold' : 'text-slate-600 hover:text-slate-900'}`}
+              className={`px-3 py-1.5 rounded-lg text-xs uppercase tracking-wider font-bold transition-colors ${
+                isActive('/') 
+                  ? 'text-white bg-white/10' 
+                  : 'text-slate-400 hover:text-white hover:bg-white/5'
+              }`}
             >
               Home
             </Link>
             <Link
               to="/tournaments"
-              className={`transition-colors ${isActive('/tournaments') ? 'text-violet-700 font-bold' : 'text-slate-600 hover:text-slate-900'}`}
+              className={`px-3 py-1.5 rounded-lg text-xs uppercase tracking-wider font-bold transition-colors ${
+                isActive('/tournaments') 
+                  ? 'text-white bg-white/10' 
+                  : 'text-slate-400 hover:text-white hover:bg-white/5'
+              }`}
             >
-              Explore Tournaments
+              Tournaments
             </Link>
             <Link
               to="/games"
-              className={`transition-colors ${isActive('/games') ? 'text-violet-700 font-bold' : 'text-slate-600 hover:text-slate-900'}`}
+              className={`px-3 py-1.5 rounded-lg text-xs uppercase tracking-wider font-bold transition-colors ${
+                isActive('/games') 
+                  ? 'text-white bg-white/10' 
+                  : 'text-slate-400 hover:text-white hover:bg-white/5'
+              }`}
             >
               Games
             </Link>
             <a
-              href="/#how-it-works"
-              className="text-slate-600 hover:text-slate-900 transition-colors"
+              href="/#features"
+              className="px-3 py-1.5 rounded-lg text-xs uppercase tracking-wider font-bold text-slate-400 hover:text-white hover:bg-white/5 transition-colors"
             >
               How It Works
             </a>
           </nav>
 
-          {/* Right Action Buttons */}
-          <div className="hidden md:flex items-center gap-4">
+          {/* Right Action Buttons - Clean, Solid & Professional */}
+          <div className="hidden md:flex items-center gap-3">
             {user ? (
               <div className="flex items-center gap-3">
-                {isOrganizer ? (
+                
+                {/* Organizer Actions */}
+                {isOrganizer && (
                   <>
                     <Link
                       to="/organizer/tournaments/create"
-                      className="flex items-center gap-2 px-4 py-2 rounded-xl bg-violet-600 hover:bg-violet-700 text-white font-semibold text-sm shadow-sm transition-all"
+                      className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-[#E6002B] hover:bg-[#C90022] text-white font-bold text-xs uppercase tracking-wider transition-colors"
                     >
-                      <PlusCircle className="w-4 h-4" /> Host Tournament
+                      <PlusCircle className="w-3.5 h-3.5" /> Host Tournament
                     </Link>
                     <Link
                       to="/organizer/dashboard"
-                      className="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold text-sm transition-colors border border-slate-200"
+                      className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-[#141824] hover:bg-[#1A2030] text-slate-200 font-semibold text-xs border border-white/10 hover:border-white/20 transition-colors"
                     >
-                      <Shield className="w-4 h-4 text-violet-600" /> Dashboard
+                      <Shield className="w-3.5 h-3.5 text-cyan-400" /> Dashboard
                     </Link>
                   </>
-                ) : (
+                )}
+
+                {/* Player / Team Actions */}
+                {!isOrganizer && (
                   <Link
-                    to="/team/dashboard"
-                    className="flex items-center gap-2 px-4 py-2 rounded-xl bg-violet-600 hover:bg-violet-700 text-white font-semibold text-sm shadow-sm transition-all"
+                    to="/tournaments"
+                    className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-[#E6002B] hover:bg-[#C90022] text-white font-bold text-xs uppercase tracking-wider transition-colors"
                   >
-                    <Users className="w-4 h-4" /> Team Dashboard
+                    <Trophy className="w-3.5 h-3.5" /> Compete
                   </Link>
                 )}
 
-                <div className="relative group">
-                  <div className="flex items-center gap-2.5 py-1.5 px-3 rounded-xl bg-slate-100 border border-slate-200 cursor-pointer hover:border-violet-400 transition-colors">
+                {/* User Dropdown Badge */}
+                <div className="relative">
+                  <button
+                    onClick={() => setUserDropdownOpen(!userDropdownOpen)}
+                    onBlur={() => setTimeout(() => setUserDropdownOpen(false), 200)}
+                    className="flex items-center gap-2.5 py-1.5 px-3 rounded-lg bg-[#141824] border border-white/10 hover:border-white/20 transition-colors focus:outline-none"
+                  >
                     <img
                       src={user.avatar || `https://api.dicebear.com/7.x/identicon/svg?seed=${user.username}`}
                       alt={user.name}
-                      className="w-7 h-7 rounded-full object-cover border border-violet-500"
+                      className="w-7 h-7 rounded-full object-cover border border-white/20"
                     />
-                    <span className="text-sm font-semibold text-slate-800">{user.name}</span>
-                  </div>
-
-                  {/* Dropdown Menu */}
-                  <div className="absolute right-0 mt-2 w-52 py-2 bg-white border border-slate-200 rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-                    <div className="px-4 py-2 border-b border-slate-100">
-                      <p className="text-xs text-slate-400 font-medium">Signed in as</p>
-                      <p className="text-sm font-bold text-slate-900 truncate">{user.username}</p>
-                      <span className="inline-block mt-1 px-2 py-0.5 text-[10px] font-bold rounded bg-violet-100 text-violet-700 uppercase">
+                    <div className="flex flex-col text-left">
+                      <span className="text-xs font-bold text-white max-w-[90px] truncate leading-tight">
+                        {user.name}
+                      </span>
+                      <span className="text-[10px] font-semibold text-cyan-400 uppercase tracking-wider">
                         {user.role}
                       </span>
                     </div>
+                    <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+                  </button>
 
-                    <Link
-                      to="/profile"
-                      className="flex items-center gap-2 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 hover:text-slate-900 font-medium"
-                    >
-                      <User className="w-4 h-4 text-slate-400" /> Account Profile
-                    </Link>
+                  {/* Dropdown Menu */}
+                  {userDropdownOpen && (
+                    <div className="absolute right-0 mt-2 w-52 py-2 bg-[#10141E] border border-white/10 rounded-xl shadow-xl z-50">
+                      <div className="px-4 py-2.5 border-b border-white/10">
+                        <p className="text-[10px] text-slate-400 uppercase font-semibold">Signed in as</p>
+                        <p className="text-sm font-bold text-white truncate">{user.username}</p>
+                        <span className="inline-block mt-1 px-2 py-0.5 text-[9px] font-bold uppercase rounded bg-white/10 text-cyan-400">
+                          {user.role}
+                        </span>
+                      </div>
 
-                    <button
-                      onClick={handleLogout}
-                      className="w-full text-left flex items-center gap-2 px-4 py-2 text-sm text-rose-600 hover:bg-rose-50 font-medium"
-                    >
-                      <LogOut className="w-4 h-4" /> Logout
-                    </button>
-                  </div>
+                      {isOrganizer ? (
+                        <>
+                          <Link
+                            to="/organizer/dashboard"
+                            className="flex items-center gap-2 px-4 py-2 text-xs text-slate-300 hover:bg-white/5 hover:text-white"
+                          >
+                            <Shield className="w-3.5 h-3.5 text-cyan-400" /> Dashboard
+                          </Link>
+                          <Link
+                            to="/organizer/tournaments"
+                            className="flex items-center gap-2 px-4 py-2 text-xs text-slate-300 hover:bg-white/5 hover:text-white"
+                          >
+                            <Trophy className="w-3.5 h-3.5 text-red-500" /> My Tournaments
+                          </Link>
+                        </>
+                      ) : (
+                        <>
+                          <Link
+                            to="/tournaments"
+                            className="flex items-center gap-2 px-4 py-2 text-xs text-slate-300 hover:bg-white/5 hover:text-white"
+                          >
+                            <Trophy className="w-3.5 h-3.5 text-cyan-400" /> Browse Tournaments
+                          </Link>
+                          <Link
+                            to="/team/my-team"
+                            className="flex items-center gap-2 px-4 py-2 text-xs text-slate-300 hover:bg-white/5 hover:text-white"
+                          >
+                            <Users className="w-3.5 h-3.5 text-slate-400" /> Team / Squad Roster
+                          </Link>
+                        </>
+                      )}
+
+                      <Link
+                        to="/profile"
+                        className="flex items-center gap-2 px-4 py-2 text-xs text-slate-300 hover:bg-white/5 hover:text-white"
+                      >
+                        <User className="w-3.5 h-3.5 text-slate-400" /> Profile Settings
+                      </Link>
+
+                      <div className="pt-1 mt-1 border-t border-white/10">
+                        <button
+                          onClick={handleLogout}
+                          className="w-full text-left flex items-center gap-2 px-4 py-2 text-xs text-red-400 hover:bg-red-500/10 font-semibold"
+                        >
+                          <LogOut className="w-3.5 h-3.5" /> Sign Out
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             ) : (
               <div className="flex items-center gap-3">
                 <Link
                   to="/login"
-                  className="px-4 py-2 rounded-xl text-sm font-semibold text-slate-700 hover:text-slate-900 hover:bg-slate-100 transition-colors"
+                  className="px-3.5 py-2 rounded-lg text-xs font-bold uppercase tracking-wider text-slate-300 hover:text-white hover:bg-white/5 transition-colors"
                 >
                   Sign In
                 </Link>
                 <Link
                   to="/register"
-                  className="px-5 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-700 text-white font-bold text-sm shadow-sm transition-all"
+                  className="px-4 py-2 rounded-lg bg-[#E6002B] hover:bg-[#C90022] text-white font-bold text-xs uppercase tracking-wider transition-colors"
                 >
                   Register
                 </Link>
@@ -146,13 +223,13 @@ export default function Navbar() {
             )}
           </div>
 
-          {/* Mobile Menu Toggle */}
+          {/* Mobile Menu Toggle Button */}
           <div className="md:hidden flex items-center">
             <button
               onClick={() => setMobileOpen(!mobileOpen)}
-              className="p-2 rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200 focus:outline-none"
+              className="p-2 rounded-lg bg-[#141824] text-slate-300 hover:text-white border border-white/10 focus:outline-none"
             >
-              {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
           </div>
         </div>
@@ -160,73 +237,76 @@ export default function Navbar() {
 
       {/* Mobile Drawer */}
       {mobileOpen && (
-        <div className="md:hidden bg-white border-t border-slate-200 py-4 px-6 space-y-4 shadow-lg">
-          <nav className="flex flex-col gap-2 font-medium text-sm">
+        <div className="md:hidden bg-[#0A0D14] border-t border-white/10 py-4 px-6 space-y-3">
+          <nav className="flex flex-col gap-1 font-semibold text-xs uppercase tracking-wider">
             <Link
               to="/"
               onClick={() => setMobileOpen(false)}
-              className={`py-2 px-3 rounded-lg ${isActive('/') ? 'bg-violet-50 text-violet-700 font-bold' : 'text-slate-700'}`}
+              className={`py-2 px-3 rounded-lg ${isActive('/') ? 'bg-white/10 text-white' : 'text-slate-300'}`}
             >
               Home
             </Link>
             <Link
               to="/tournaments"
               onClick={() => setMobileOpen(false)}
-              className={`py-2 px-3 rounded-lg ${isActive('/tournaments') ? 'bg-violet-50 text-violet-700 font-bold' : 'text-slate-700'}`}
+              className={`py-2 px-3 rounded-lg ${isActive('/tournaments') ? 'bg-white/10 text-white' : 'text-slate-300'}`}
             >
-              Explore Tournaments
+              Tournaments
             </Link>
             <Link
               to="/games"
               onClick={() => setMobileOpen(false)}
-              className={`py-2 px-3 rounded-lg ${isActive('/games') ? 'bg-violet-50 text-violet-700 font-bold' : 'text-slate-700'}`}
+              className={`py-2 px-3 rounded-lg ${isActive('/games') ? 'bg-white/10 text-white' : 'text-slate-300'}`}
             >
               Games
             </Link>
           </nav>
 
-          <div className="pt-4 border-t border-slate-200 flex flex-col gap-3">
+          <div className="pt-3 border-t border-white/10 flex flex-col gap-2.5">
             {user ? (
               <>
+                <div className="flex items-center gap-3 p-2.5 bg-[#141824] rounded-lg border border-white/10">
+                  <img
+                    src={user.avatar || `https://api.dicebear.com/7.x/identicon/svg?seed=${user.username}`}
+                    alt={user.name}
+                    className="w-8 h-8 rounded-full object-cover"
+                  />
+                  <div className="flex flex-col">
+                    <span className="text-xs font-bold text-white">{user.name}</span>
+                    <span className="text-[10px] text-cyan-400 uppercase font-semibold">{user.role}</span>
+                  </div>
+                </div>
+
                 {isOrganizer && (
                   <Link
                     to="/organizer/tournaments/create"
                     onClick={() => setMobileOpen(false)}
-                    className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-violet-600 text-white font-bold text-sm shadow-sm"
+                    className="w-full flex items-center justify-center gap-1.5 py-2.5 rounded-lg bg-[#E6002B] text-white font-bold text-xs uppercase tracking-wider"
                   >
                     <PlusCircle className="w-4 h-4" /> Host Tournament
                   </Link>
                 )}
-                <Link
-                  to={isOrganizer ? '/organizer/dashboard' : '/team/dashboard'}
-                  onClick={() => setMobileOpen(false)}
-                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-slate-100 border border-slate-200 text-slate-800 font-bold text-sm"
-                >
-                  Dashboard
-                </Link>
+
                 <button
-                  onClick={() => {
-                    handleLogout();
-                    setMobileOpen(false);
-                  }}
-                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-rose-50 text-rose-600 font-semibold text-sm border border-rose-200"
+                  onClick={handleLogout}
+                  className="w-full flex items-center justify-center gap-1.5 py-2 rounded-lg bg-red-500/10 text-red-400 font-bold text-xs uppercase border border-red-500/20"
                 >
-                  <LogOut className="w-4 h-4" /> Logout
+                  <LogOut className="w-4 h-4" /> Sign Out
                 </button>
               </>
             ) : (
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-2.5 pt-1">
                 <Link
                   to="/login"
                   onClick={() => setMobileOpen(false)}
-                  className="text-center py-2.5 rounded-xl bg-slate-100 border border-slate-200 text-slate-800 text-sm font-semibold"
+                  className="text-center py-2.5 rounded-lg bg-[#141824] border border-white/10 text-slate-200 text-xs font-bold uppercase"
                 >
                   Sign In
                 </Link>
                 <Link
                   to="/register"
                   onClick={() => setMobileOpen(false)}
-                  className="text-center py-2.5 rounded-xl bg-violet-600 text-white text-sm font-bold shadow-sm"
+                  className="text-center py-2.5 rounded-lg bg-[#E6002B] text-white text-xs font-bold uppercase tracking-wider"
                 >
                   Register
                 </Link>

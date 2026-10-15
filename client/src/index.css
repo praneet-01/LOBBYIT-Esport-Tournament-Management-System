@@ -4,10 +4,11 @@
 
 @layer base {
   body {
-    background-color: #12131C;
+    background-color: #000000;
     color: #F1F5F9;
     font-family: 'Inter', sans-serif;
     letter-spacing: -0.01em;
+    overflow-x: hidden;
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -16,43 +17,38 @@
   }
 }
 
-/* Custom Scrollbar */
+/* Custom Clean Esports Scrollbar */
 ::-webkit-scrollbar {
-  width: 7px;
-  height: 7px;
+  width: 6px;
+  height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #12131C;
+  background: #08090D;
 }
 ::-webkit-scrollbar-thumb {
-  background: #2D3047;
-  border-radius: 4px;
+  background: #1E2333;
+  border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #3B82F6;
+  background: #E6002B;
 }
 
-.toornament-card {
-  background: #1C1D2A;
-  border: 1px solid #282A3E;
-  transition: all 0.2s ease-in-out;
+/* Clean Gaming Cards - No fuzzy neon glow */
+.esports-card {
+  background: #10141E;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: border-color 0.2s ease, transform 0.2s ease;
 }
 
-.toornament-card:hover {
-  border-color: #3B82F6;
+.esports-card:hover {
+  border-color: #E6002B;
   transform: translateY(-2px);
 }
 
-.toornament-badge-open {
-  background-color: rgba(16, 185, 129, 0.15);
-  color: #10B981;
-  border: 1px solid rgba(16, 185, 129, 0.3);
-}
-
-.toornament-badge-ongoing {
-  background-color: rgba(239, 68, 68, 0.15);
-  color: #EF4444;
-  border: 1px solid rgba(239, 68, 68, 0.3);
+.font-gaming {
+  font-family: 'Rajdhani', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .font-brand {

@@ -52,20 +52,20 @@ export default function Tournaments() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
       
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 pb-6">
+      {/* Header with High-Contrast Crisp White Text */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/10 pb-5">
         <div>
-          <div className="flex items-center gap-2 text-xs font-bold text-violet-700 uppercase tracking-wider">
+          <div className="flex items-center gap-2 text-xs font-bold text-cyan-400 uppercase tracking-wider font-gaming">
             <Compass className="w-4 h-4" /> Discovery Hub
           </div>
-          <h1 className="text-3xl font-extrabold text-slate-900 mt-1">Esports Tournaments</h1>
-          <p className="text-sm text-slate-500 mt-1">
+          <h1 className="text-3xl font-black text-white mt-1 font-gaming tracking-wide">Esports Tournaments</h1>
+          <p className="text-xs sm:text-sm text-slate-400 mt-1">
             Browse live competitive tournaments, check roster requirements, and enter your team.
           </p>
         </div>
-        <div className="px-4 py-2 rounded-xl bg-white border border-slate-200 shadow-xs text-xs text-slate-700 flex items-center gap-2 font-medium">
-          <Trophy className="w-4 h-4 text-violet-600" />
-          <span>Showing <strong className="text-slate-900 font-bold">{tournaments.length}</strong> tournaments</span>
+        <div className="px-3.5 py-1.5 rounded-lg bg-[#10141E] border border-white/10 text-xs text-slate-300 flex items-center gap-2 font-medium">
+          <Trophy className="w-4 h-4 text-[#E6002B]" />
+          <span>Showing <strong className="text-white font-bold">{tournaments.length}</strong> tournaments</span>
         </div>
       </div>
 

@@ -3,10 +3,13 @@ const mongoose = require('mongoose');
 const registrationSchema = new mongoose.Schema({
   tournament: { type: mongoose.Schema.Types.ObjectId, ref: 'Tournament', required: true },
   team: { type: mongoose.Schema.Types.ObjectId, ref: 'Team', required: true },
+  teamName: { type: String, default: '' },
+  teamTag: { type: String, default: '' },
   submittedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   players: [{
     name: { type: String, required: true },
     inGameName: { type: String, required: true },
+    inGameId: { type: String, default: '' },
     email: { type: String, default: '' },
     country: { type: String, default: 'India' }
   }],

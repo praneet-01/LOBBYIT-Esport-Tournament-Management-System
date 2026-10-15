@@ -9,21 +9,29 @@ import {
   AlertCircle, 
   CheckCircle2, 
   ChevronLeft, 
-  UserPlus, 
-  ArrowRight 
+  Plus, 
+  Trash2,
+  ArrowRight,
+  UserCheck
 } from 'lucide-react';
 
 export default function RegisterTeam() {
   const { slug } = useParams();
   const navigate = useNavigate();
-  const { user, isTeam } = useAuth();
+  const { user } = useAuth();
 
   const [tournament, setTournament] = useState(null);
-  const [team, setTeam] = useState(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+
+  // Team Details & Lineup State
+  const [teamName, setTeamName] = useState('');
+  const [teamTag, setTeamTag] = useState('');
+  const [players, setPlayers] = useState([
+    { name: user?.name || '', inGameName: user?.username || '', inGameId: '', email: user?.email || '', isCaptain: true }
+  ]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -31,12 +39,25 @@ export default function RegisterTeam() {
         const tRes = await api.get(`/tournaments/slug/${slug}`);
         setTournament(tRes.data);
 
-        if (user && isTeam) {
+        // Pre-fill existing team if user has one
+        if (user && user.role !== 'Organizer') {
           try {
             const teamRes = await api.get('/teams/me');
-            setTeam(teamRes.data);
+            if (teamRes.data) {
+              setTeamName(teamRes.data.name || '');
+              setTeamTag(teamRes.data.tag || '');
+              if (teamRes.data.players && teamRes.data.players.length > 0) {
+                setPlayers(teamRes.data.players.map((p, idx) => ({
+                  name: p.name || '',
+                  inGameName: p.inGameName || '',
+                  inGameId: p.inGameId || '',
+                  email: p.email || '',
+                  isCaptain: idx === 0
+                })));
+              }
+            }
           } catch (tErr) {
-            console.log('No team profile found for this user account');
+            // No existing team, user will enter team name and players directly
           }
         }
       } catch (err) {
@@ -47,37 +68,128 @@ export default function RegisterTeam() {
     };
 
     fetchData();
-  }, [slug, user, isTeam]);
+  }, [slug, user]);
+
+  // Sync captain name when user loads
+  useEffect(() => {
+    if (user && players.length > 0 && !players[0].name) {
+      setPlayers((prev) => {
+        const updated = [...prev];
+        updated[0] = {
+          ...updated[0],
+          name: user.name,
+          inGameName: user.username,
+          email: user.email,
+          isCaptain: true
+        };
+        return updated;
+      });
+    }
+  }, [user]);
+
+  const handleAddPlayer = () => {
+    const maxRequired = tournament?.teamSize?.max || 10;
+    if (players.length >= maxRequired) {
+      setError(`Cannot add more players. Maximum team size is ${maxRequired}.`);
+      return;
+    }
+    setError('');
+    setPlayers([
+      ...players,
+      { name: '', inGameName: '', inGameId: '', email: '', isCaptain: false }
+    ]);
+  };
+
+  const handleRemovePlayer = (index) => {
+    if (index === 0) {
+      setError('Cannot remove In-Game Leader (Captain).');
+      return;
+    }
+    setError('');
+    setPlayers(players.filter((_, idx) => idx !== index));
+  };
+
+  const handlePlayerChange = (index, field, value) => {
+    const updated = [...players];
+    updated[index][field] = value;
+    setPlayers(updated);
+  };
+
+  const handleSubmitRegistration = async (e) => {
+    e.preventDefault();
+    setError('');
+    setSuccess('');
+
+    if (!teamName.trim()) {
+      setError('Please provide a Team / Squad Name.');
+      return;
+    }
+
+    const minRequired = tournament?.teamSize?.min || 1;
+    const maxRequired = tournament?.teamSize?.max || 10;
+
+    if (players.length < minRequired || players.length > maxRequired) {
+      setError(`Tournament requirement error: Lineup requires between ${minRequired} and ${maxRequired} players. You currently have ${players.length}.`);
+      return;
+    }
+
+    // Verify all players have name and in-game name
+    for (let i = 0; i < players.length; i++) {
+      if (!players[i].name.trim() || !players[i].inGameName.trim()) {
+        setError(`Please fill in Player Name and In-Game Name for Player #${i + 1}.`);
+        return;
+      }
+    }
+
+    setSubmitting(true);
+    try {
+      await api.post('/registrations', {
+        tournamentId: tournament._id,
+        teamName: teamName.trim(),
+        teamTag: teamTag.trim() || teamName.substring(0, 4).toUpperCase(),
+        players: players
+      });
+
+      setSuccess('Team registration submitted successfully! Status: Pending Organizer Review.');
+      setTimeout(() => {
+        navigate('/tournaments');
+      }, 2000);
+    } catch (err) {
+      setError(err.response?.data?.message || 'Registration submission failed');
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   if (loading) {
     return (
       <div className="max-w-7xl mx-auto px-4 py-16 text-center">
-        <div className="w-10 h-10 border-4 border-violet-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
-        <p className="mt-4 text-slate-500 font-medium text-sm">Preparing registration lobby...</p>
+        <div className="w-8 h-8 border-3 border-[#E6002B] border-t-transparent rounded-full animate-spin mx-auto"></div>
+        <p className="mt-3 text-slate-400 text-xs">Preparing tournament registration lobby...</p>
       </div>
     );
   }
 
   if (!user) {
     return (
-      <div className="max-w-md mx-auto my-16 p-8 bg-white rounded-2xl border border-slate-200 shadow-sm text-center space-y-4">
-        <Users className="w-12 h-12 text-violet-600 mx-auto" />
-        <h2 className="text-xl font-bold text-slate-900">Sign In Required</h2>
-        <p className="text-sm text-slate-500">
-          You must be signed in as a <strong>Team</strong> user to register for this tournament.
+      <div className="max-w-md mx-auto my-16 p-8 bg-[#10141E] rounded-xl border border-white/10 text-center space-y-4">
+        <Users className="w-12 h-12 text-[#E6002B] mx-auto" />
+        <h2 className="text-xl font-bold text-white font-gaming">Sign In Required</h2>
+        <p className="text-xs text-slate-400">
+          You must be signed in as a player to register your team for this tournament.
         </p>
         <div className="flex gap-3 justify-center pt-2">
           <Link
             to="/login"
-            className="px-6 py-2.5 rounded-xl bg-violet-600 text-white font-bold text-sm shadow-sm"
+            className="px-5 py-2 rounded-lg bg-[#E6002B] text-white font-bold text-xs uppercase tracking-wider font-gaming"
           >
             Sign In
           </Link>
           <Link
-            to="/register?role=Team"
-            className="px-6 py-2.5 rounded-xl bg-slate-100 text-slate-800 font-bold text-sm border border-slate-200"
+            to="/register"
+            className="px-5 py-2 rounded-lg bg-[#141824] text-slate-200 font-bold text-xs uppercase tracking-wider border border-white/15 font-gaming"
           >
-            Create Team Account
+            Create Account
           </Link>
         </div>
       </div>
@@ -86,15 +198,15 @@ export default function RegisterTeam() {
 
   if (user.role === 'Organizer') {
     return (
-      <div className="max-w-md mx-auto my-16 p-8 bg-white rounded-2xl border border-slate-200 shadow-sm text-center space-y-4">
+      <div className="max-w-md mx-auto my-16 p-8 bg-[#10141E] rounded-xl border border-white/10 text-center space-y-4">
         <ShieldCheck className="w-12 h-12 text-amber-500 mx-auto" />
-        <h2 className="text-xl font-bold text-slate-900">Organizer Account Detected</h2>
-        <p className="text-sm text-slate-500">
-          Organizers host tournaments and review team registrations. To register a squad, sign in with a Team account.
+        <h2 className="text-xl font-bold text-white font-gaming">Organizer Account Detected</h2>
+        <p className="text-xs text-slate-400">
+          Organizers host tournaments. To register a squad as an In-Game Leader, sign in with a Player account.
         </p>
         <Link
           to="/organizer/dashboard"
-          className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-violet-600 text-white font-bold text-sm shadow-sm"
+          className="inline-flex items-center gap-1.5 px-5 py-2 rounded-lg bg-[#E6002B] text-white font-bold text-xs uppercase font-gaming"
         >
           Go to Organizer Dashboard
         </Link>
@@ -102,194 +214,225 @@ export default function RegisterTeam() {
     );
   }
 
-  if (!team) {
-    return (
-      <div className="max-w-lg mx-auto my-16 p-8 bg-white rounded-2xl border border-slate-200 shadow-sm text-center space-y-4">
-        <AlertCircle className="w-12 h-12 text-amber-500 mx-auto" />
-        <h2 className="text-xl font-bold text-slate-900">No Team Profile Created</h2>
-        <p className="text-sm text-slate-500">
-          Set up your team profile and player roster before registering for <strong>{tournament?.title}</strong>.
-        </p>
-        <Link
-          to="/team/my-team"
-          className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-violet-600 text-white font-bold text-sm shadow-sm"
-        >
-          <UserPlus className="w-4 h-4" /> Create Team Profile Now
-        </Link>
-      </div>
-    );
-  }
-
-  const minRequired = tournament?.teamSize?.min || 5;
-  const maxRequired = tournament?.teamSize?.max || 7;
-  const playerLength = team?.players?.length || 0;
-  const isValidLineup = playerLength >= minRequired && playerLength <= maxRequired;
-
-  const handleSubmitRegistration = async () => {
-    setError('');
-    setSuccess('');
-
-    if (!isValidLineup) {
-      setError(`Lineup requirement error: Tournament requires ${minRequired}-${maxRequired} players. Your team has ${playerLength} players.`);
-      return;
-    }
-
-    setSubmitting(true);
-    try {
-      await api.post('/registrations', {
-        tournamentId: tournament._id,
-        teamId: team._id,
-        players: team.players
-      });
-
-      setSuccess('Registration submitted successfully! Status: Pending Organizer Review');
-      setTimeout(() => {
-        navigate('/team/registrations');
-      }, 1500);
-    } catch (err) {
-      setError(err.response?.data?.message || 'Registration submission failed');
-    } finally {
-      setSubmitting(false);
-    }
-  };
+  const minRequired = tournament?.teamSize?.min || 1;
+  const maxRequired = tournament?.teamSize?.max || 10;
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-6 bg-black text-slate-100 min-h-[85vh]">
       
       <Link
         to={`/tournaments/${slug}`}
-        className="inline-flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
+        className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-400 hover:text-white transition-colors"
       >
         <ChevronLeft className="w-4 h-4" /> Back to Tournament
       </Link>
 
-      <div className="border-b border-slate-200 pb-4">
-        <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900">
-          Tournament Registration
+      <div className="border-b border-white/10 pb-4">
+        <h1 className="text-2xl sm:text-3xl font-black text-white font-gaming tracking-wide">
+          Team Registration & Lineup Submission
         </h1>
-        <p className="text-sm text-slate-500">
-          Review lineup validation requirements and submit your team entry.
+        <p className="text-xs sm:text-sm text-slate-400 mt-1">
+          As the In-Game Leader, enter your squad details, gamer tags, and in-game IDs to compete.
         </p>
       </div>
 
       {error && (
-        <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-sm flex items-center gap-3 font-medium">
-          <AlertCircle className="w-5 h-5 shrink-0 text-rose-600" />
+        <div className="p-3.5 rounded-lg bg-red-500/10 border border-red-500/25 text-red-300 text-xs flex items-center gap-2">
+          <AlertCircle className="w-4 h-4 shrink-0 text-red-400" />
           <span>{error}</span>
         </div>
       )}
 
       {success && (
-        <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm flex items-center gap-3 font-medium">
-          <CheckCircle2 className="w-5 h-5 shrink-0 text-emerald-600" />
+        <div className="p-3.5 rounded-lg bg-emerald-500/10 border border-emerald-500/25 text-emerald-300 text-xs flex items-center gap-2">
+          <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-400" />
           <span>{success}</span>
         </div>
       )}
 
-      {/* STEP 1 */}
-      <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-4">
-        <span className="text-xs font-bold text-violet-700 uppercase tracking-wider">Step 1 — Target Tournament</span>
-        <div className="flex items-center gap-4">
-          <img
-            src={tournament?.logo || tournament?.banner}
-            alt={tournament?.title}
-            className="w-16 h-16 rounded-xl object-cover border border-slate-200"
-          />
-          <div>
-            <h3 className="text-lg font-bold text-slate-900">{tournament?.title}</h3>
-            <p className="text-xs text-slate-500">
-              Game: <strong className="text-slate-800 font-semibold">{tournament?.game}</strong> • Prize Pool: <strong className="text-amber-600 font-bold">{tournament?.prizePool}</strong>
-            </p>
-          </div>
+      {/* Target Tournament Summary Banner */}
+      <div className="bg-[#10141E] rounded-xl p-5 border border-white/10 flex items-center gap-4">
+        <img
+          src={tournament?.banner || 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=400&q=80'}
+          alt={tournament?.title}
+          className="w-16 h-16 rounded-lg object-cover border border-white/10"
+        />
+        <div className="space-y-1">
+          <span className="text-[10px] font-bold text-cyan-400 uppercase tracking-wider font-gaming">
+            {tournament?.game} • {tournament?.tournamentType}
+          </span>
+          <h3 className="text-base sm:text-lg font-black text-white font-gaming">{tournament?.title}</h3>
+          <p className="text-xs text-slate-400">
+            Roster Requirements: <strong className="text-white">{minRequired} - {maxRequired} Players</strong> (including In-Game Leader)
+          </p>
         </div>
       </div>
 
-      {/* STEP 2 */}
-      <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <span className="text-xs font-bold text-sky-700 uppercase tracking-wider">Step 2 — Selected Team & Roster Lineup</span>
-            <h3 className="text-lg font-bold text-slate-900 mt-1">{team.name}</h3>
-          </div>
-          <Link
-            to="/team/my-team"
-            className="text-xs text-violet-700 hover:text-violet-800 font-bold underline"
-          >
-            Edit Team / Roster
-          </Link>
-        </div>
+      <form onSubmit={handleSubmitRegistration} className="space-y-6">
+        
+        {/* STEP 1: Team / Squad Info */}
+        <div className="bg-[#10141E] rounded-xl p-6 border border-white/10 space-y-4">
+          <h3 className="text-sm font-bold text-white uppercase tracking-wider font-gaming border-b border-white/10 pb-2">
+            1. Team / Squad Identity
+          </h3>
 
-        {/* Validation Box */}
-        <div className={`p-4 rounded-xl border text-xs flex items-center justify-between ${
-          isValidLineup
-            ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
-            : 'bg-rose-50 border-rose-200 text-rose-800'
-        }`}>
-          <div className="flex items-center gap-2.5">
-            {isValidLineup ? <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" /> : <AlertCircle className="w-5 h-5 text-rose-600 shrink-0" />}
-            <div>
-              <p className="font-bold text-sm">
-                Lineup Validation: {isValidLineup ? 'PASSED' : 'INCOMPLETE'}
-              </p>
-              <p className="text-xs mt-0.5 font-medium">
-                Required: {minRequired}-{maxRequired} players. Current roster: {playerLength} players.
-              </p>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="sm:col-span-2 space-y-1">
+              <label className="block text-xs font-semibold text-slate-300">
+                Team / Squad Name <span className="text-red-400">*</span>
+              </label>
+              <input
+                type="text"
+                placeholder="e.g. Sentinels Esports"
+                value={teamName}
+                onChange={(e) => setTeamName(e.target.value)}
+                className="w-full px-3 py-2 rounded-lg bg-[#0B0E17] border border-white/15 text-white placeholder-slate-500 text-xs focus:outline-none focus:border-[#E6002B]"
+                required
+              />
+            </div>
+
+            <div className="space-y-1">
+              <label className="block text-xs font-semibold text-slate-300">
+                Team Tag / Shorthand
+              </label>
+              <input
+                type="text"
+                placeholder="e.g. SEN"
+                maxLength={6}
+                value={teamTag}
+                onChange={(e) => setTeamTag(e.target.value.toUpperCase())}
+                className="w-full px-3 py-2 rounded-lg bg-[#0B0E17] border border-white/15 text-white placeholder-slate-500 text-xs focus:outline-none focus:border-[#E6002B]"
+              />
             </div>
           </div>
-          {!isValidLineup && (
-            <Link
-              to="/team/my-team"
-              className="px-3.5 py-1.5 rounded-lg bg-rose-600 text-white font-bold text-xs shadow-xs"
-            >
-              Add Players
-            </Link>
-          )}
         </div>
 
-        {/* Player Roster */}
-        <div className="space-y-3">
-          <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider">Player Lineup Roster</h4>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {team.players.map((p, idx) => (
-              <div key={idx} className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-violet-100 text-violet-700 flex items-center justify-center font-bold text-xs">
-                  P{idx + 1}
+        {/* STEP 2: In-Game Leader & Teammates Lineup */}
+        <div className="bg-[#10141E] rounded-xl p-6 border border-white/10 space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/10 pb-2">
+            <div>
+              <h3 className="text-sm font-bold text-white uppercase tracking-wider font-gaming">
+                2. Player Lineup & Gamer IDs ({players.length} / {maxRequired})
+              </h3>
+              <p className="text-[11px] text-slate-400">
+                Provide In-Game Name (IGN) and In-Game ID / UID for each competitor.
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={handleAddPlayer}
+              disabled={players.length >= maxRequired}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#141824] hover:bg-[#1C2232] text-cyan-400 border border-white/10 text-xs font-bold font-gaming transition-colors disabled:opacity-40 cursor-pointer"
+            >
+              <Plus className="w-3.5 h-3.5" /> Add Teammate
+            </button>
+          </div>
+
+          <div className="space-y-3 pt-1">
+            {players.map((player, index) => (
+              <div 
+                key={index} 
+                className={`p-4 rounded-lg border space-y-3 ${
+                  index === 0 
+                    ? 'bg-[#121826] border-cyan-500/30' 
+                    : 'bg-[#0B0E17] border-white/10'
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-bold text-white font-gaming">
+                      Player #{index + 1}
+                    </span>
+                    {index === 0 && (
+                      <span className="px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-400 text-[10px] font-bold uppercase tracking-wider font-gaming flex items-center gap-1">
+                        <UserCheck className="w-3 h-3" /> In-Game Leader (Captain)
+                      </span>
+                    )}
+                  </div>
+
+                  {index > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => handleRemovePlayer(index)}
+                      className="text-red-400 hover:text-red-300 p-1 text-xs transition-colors"
+                      title="Remove Player"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  )}
                 </div>
-                <div className="overflow-hidden text-xs">
-                  <p className="font-bold text-slate-900 truncate">{p.name}</p>
-                  <p className="text-slate-500 text-[11px]">IGN: <strong className="text-violet-700">{p.inGameName}</strong> ({p.country})</p>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div className="space-y-1">
+                    <label className="block text-[11px] text-slate-400">
+                      Full / Player Name <span className="text-red-400">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Tyson Ngo"
+                      value={player.name}
+                      onChange={(e) => handlePlayerChange(index, 'name', e.target.value)}
+                      className="w-full px-2.5 py-1.5 rounded-lg bg-[#141824] border border-white/10 text-white placeholder-slate-500 text-xs focus:outline-none focus:border-[#E6002B]"
+                      required
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="block text-[11px] text-slate-400">
+                      In-Game Name (IGN) <span className="text-red-400">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g. TenZ#1337"
+                      value={player.inGameName}
+                      onChange={(e) => handlePlayerChange(index, 'inGameName', e.target.value)}
+                      className="w-full px-2.5 py-1.5 rounded-lg bg-[#141824] border border-white/10 text-white placeholder-slate-500 text-xs focus:outline-none focus:border-[#E6002B]"
+                      required
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="block text-[11px] text-slate-400">
+                      In-Game ID / UID
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g. 984210398"
+                      value={player.inGameId}
+                      onChange={(e) => handlePlayerChange(index, 'inGameId', e.target.value)}
+                      className="w-full px-2.5 py-1.5 rounded-lg bg-[#141824] border border-white/10 text-white placeholder-slate-500 text-xs focus:outline-none focus:border-[#E6002B]"
+                    />
+                  </div>
                 </div>
               </div>
             ))}
           </div>
         </div>
-      </div>
 
-      {/* STEP 3 */}
-      <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-4">
-        <span className="text-xs font-bold text-amber-600 uppercase tracking-wider">Step 3 — Submit Registration</span>
-        <p className="text-xs text-slate-600 leading-relaxed">
-          By submitting this registration, your team roster will be sent directly to the tournament organizer for review. You will track your application status in your Team Dashboard.
-        </p>
+        {/* Submit Button */}
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-2">
+          <p className="text-xs text-slate-400">
+            By submitting, you certify that all entered player IGNs and gamer IDs are accurate.
+          </p>
 
-        <button
-          onClick={handleSubmitRegistration}
-          disabled={!isValidLineup || submitting}
-          className={`w-full py-4 rounded-xl font-extrabold text-base shadow-sm transition-all flex items-center justify-center gap-2 ${
-            isValidLineup && !submitting
-              ? 'bg-violet-600 hover:bg-violet-700 text-white cursor-pointer hover:scale-[1.01]'
-              : 'bg-slate-200 text-slate-400 border border-slate-300 cursor-not-allowed'
-          }`}
-        >
-          {submitting ? (
-            <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-          ) : (
-            <>
-              Submit Tournament Registration <ArrowRight className="w-5 h-5" />
-            </>
-          )}
-        </button>
-      </div>
+          <button
+            type="submit"
+            disabled={submitting}
+            className="w-full sm:w-auto px-8 py-3 rounded-lg bg-[#E6002B] hover:bg-[#C90022] text-white font-bold text-xs uppercase tracking-wider transition-colors flex items-center justify-center gap-2 font-gaming disabled:opacity-50 cursor-pointer"
+          >
+            {submitting ? (
+              <span>Submitting Lineup...</span>
+            ) : (
+              <>
+                <span>Submit Team Registration</span>
+                <ArrowRight className="w-4 h-4" />
+              </>
+            )}
+          </button>
+        </div>
+
+      </form>
 
     </div>
   );

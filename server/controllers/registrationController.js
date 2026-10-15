@@ -7,10 +7,10 @@ const Team = require('../models/Team');
 // @access  Private (Team user)
 const createRegistration = async (req, res) => {
   try {
-    const { tournamentId, teamId, players } = req.body;
+    const { tournamentId, teamId, players, teamName } = req.body;
 
-    if (!tournamentId || !teamId || !players) {
-      return res.status(400).json({ message: 'Tournament, Team, and Player lineup are required' });
+    if (!tournamentId || (!teamId && !teamName) || !players) {
+      return res.status(400).json({ message: 'Tournament, Team (or Team Name), and Player lineup are required' });
     }
 
     const tournament = await Tournament.findById(tournamentId);
@@ -37,10 +37,33 @@ const createRegistration = async (req, res) => {
       return res.status(400).json({ message: 'Tournament has reached maximum capacity' });
     }
 
-    // 4. Validate team ownership
-    const team = await Team.findById(teamId);
+    let team;
+    if (teamId) {
+      team = await Team.findById(teamId);
+    } else if (req.body.teamName) {
+      team = await Team.findOne({ owner: req.user._id });
+      if (!team) {
+        team = await Team.create({
+          name: req.body.teamName,
+          tag: req.body.teamTag || req.body.teamName.substring(0, 4).toUpperCase(),
+          owner: req.user._id,
+          captain: {
+            name: req.user.name,
+            inGameName: players[0]?.inGameName || req.user.username,
+            email: req.user.email
+          },
+          players: players
+        });
+      } else {
+        team.name = req.body.teamName;
+        if (req.body.teamTag) team.tag = req.body.teamTag;
+        team.players = players;
+        await team.save();
+      }
+    }
+
     if (!team) {
-      return res.status(404).json({ message: 'Team profile not found' });
+      return res.status(404).json({ message: 'Team profile or team name is required' });
     }
     if (team.owner.toString() !== req.user._id.toString()) {
       return res.status(403).json({ message: 'You can only register your own team' });
@@ -58,7 +81,7 @@ const createRegistration = async (req, res) => {
     // 6. Check duplicate registration
     const duplicate = await Registration.findOne({
       tournament: tournamentId,
-      team: teamId
+      team: team._id
     });
     if (duplicate) {
       return res.status(400).json({ message: 'Your team has already registered for this tournament' });
@@ -66,7 +89,9 @@ const createRegistration = async (req, res) => {
 
     const registration = await Registration.create({
       tournament: tournamentId,
-      team: teamId,
+      team: team._id,
+      teamName: req.body.teamName || team.name,
+      teamTag: req.body.teamTag || team.tag || '',
       submittedBy: req.user._id,
       players,
       status: 'pending',

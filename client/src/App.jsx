@@ -29,22 +29,22 @@ const OrganizerRoute = ({ children }) => {
   const { user, loading } = useAuth();
   if (loading) return null;
   if (!user) return <Navigate to="/login" replace />;
-  if (user.role !== 'Organizer') return <Navigate to="/team/dashboard" replace />;
+  if (user.role !== 'Organizer' && user.role !== 'Admin') return <Navigate to="/team/dashboard" replace />;
   return children;
 };
 
-// Protected Route Wrapper for Team
+// Protected Route Wrapper for Player / Team
 const TeamRoute = ({ children }) => {
   const { user, loading } = useAuth();
   if (loading) return null;
   if (!user) return <Navigate to="/login" replace />;
-  if (user.role !== 'Team') return <Navigate to="/organizer/dashboard" replace />;
+  if (user.role !== 'Team' && user.role !== 'Player') return <Navigate to="/organizer/dashboard" replace />;
   return children;
 };
 
 export default function App() {
   return (
-    <div className="flex flex-col min-h-screen bg-slate-50 text-slate-900 font-sans">
+    <div className="flex flex-col min-h-screen bg-black text-slate-100 font-sans selection:bg-crimson selection:text-white">
       <Navbar />
       <main className="flex-1">
         <Routes>
@@ -86,6 +86,14 @@ export default function App() {
           />
           <Route
             path="/organizer/registrations"
+            element={
+              <OrganizerRoute>
+                <OrganizerRegistrations />
+              </OrganizerRoute>
+            }
+          />
+          <Route
+            path="/organizer/registrations/:id"
             element={
               <OrganizerRoute>
                 <OrganizerRegistrations />

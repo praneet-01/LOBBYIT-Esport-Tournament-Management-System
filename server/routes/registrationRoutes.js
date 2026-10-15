@@ -10,8 +10,8 @@ const {
 const { protect } = require('../middleware/auth');
 const { authorize } = require('../middleware/role');
 
-router.post('/', protect, authorize('Team'), createRegistration);
-router.get('/my', protect, authorize('Team'), getMyRegistrations);
+router.post('/', protect, authorize('Player', 'Team'), createRegistration);
+router.get('/my', protect, authorize('Player', 'Team'), getMyRegistrations);
 router.get('/:id', protect, getRegistrationById);
 
 router.patch('/:id/accept', protect, authorize('Organizer'), acceptRegistration);

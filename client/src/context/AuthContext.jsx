@@ -66,6 +66,52 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const sendOtp = async (payload) => {
+    setError(null);
+    try {
+      const response = await api.post('/auth/send-otp', payload);
+      return response.data;
+    } catch (err) {
+      const msg = err.response?.data?.message || 'Failed to send verification code';
+      setError(msg);
+      throw new Error(msg);
+    }
+  };
+
+  const verifyOtpRegister = async ({ email, otp }) => {
+    setError(null);
+    try {
+      const response = await api.post('/auth/verify-otp-register', { email, otp });
+      const { token: jwtToken, ...userData } = response.data;
+      
+      localStorage.setItem('token', jwtToken);
+      setToken(jwtToken);
+      setUser(userData);
+      return userData;
+    } catch (err) {
+      const msg = err.response?.data?.message || 'Verification failed';
+      setError(msg);
+      throw new Error(msg);
+    }
+  };
+
+  const verifyOtpLogin = async ({ email, otp }) => {
+    setError(null);
+    try {
+      const response = await api.post('/auth/verify-otp-login', { email, otp });
+      const { token: jwtToken, ...userData } = response.data;
+      
+      localStorage.setItem('token', jwtToken);
+      setToken(jwtToken);
+      setUser(userData);
+      return userData;
+    } catch (err) {
+      const msg = err.response?.data?.message || 'OTP Login failed';
+      setError(msg);
+      throw new Error(msg);
+    }
+  };
+
   const logout = () => {
     localStorage.removeItem('token');
     setToken(null);
@@ -81,15 +127,21 @@ export const AuthProvider = ({ children }) => {
         error,
         login,
         register,
+        sendOtp,
+        verifyOtpRegister,
+        verifyOtpLogin,
         logout,
         isOrganizer: user?.role === 'Organizer',
-        isTeam: user?.role === 'Team'
+        isTeam: user?.role === 'Team' || user?.role === 'Player',
+        isPlayer: user?.role === 'Player' || user?.role === 'Team',
+        isAdmin: user?.role === 'Admin'
       }}
     >
       {children}
     </AuthContext.Provider>
   );
 };
+
 
 export const useAuth = () => {
   const context = useContext(AuthContext);

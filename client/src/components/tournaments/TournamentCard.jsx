@@ -43,14 +43,14 @@ export default function TournamentCard({ tournament }) {
         
         {/* Top Badges */}
         <div className="absolute top-3 left-3 right-3 flex items-center justify-between z-10">
-          <span className="px-2.5 py-1 rounded-lg bg-black/70 backdrop-blur-md text-[11px] font-extrabold text-cyber-cyan border border-cyber-cyan/30 uppercase tracking-wider font-gaming">
+          <span className="px-2.5 py-1 rounded-lg bg-black/70 backdrop-blur-md text-xs font-extrabold text-cyber-cyan border border-cyber-cyan/30 uppercase tracking-wider font-gaming">
             {game}
           </span>
           <StatusBadge status={status} type="tournament" />
         </div>
 
         {/* Prize Pool Floating Badge */}
-        <div className="absolute bottom-3 right-3 px-3 py-1 rounded-lg bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-black text-xs shadow-lg flex items-center gap-1.5 font-gaming">
+        <div className="absolute bottom-3 right-3 px-3 py-1 rounded-lg bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-black text-sm shadow-lg flex items-center gap-1.5 font-gaming">
           <Trophy className="w-3.5 h-3.5 text-slate-950" />
           <span>{prizePool}</span>
         </div>
@@ -60,51 +60,51 @@ export default function TournamentCard({ tournament }) {
       <div className="p-5 flex-1 flex flex-col justify-between space-y-4 bg-gradient-to-b from-[#0E121B] to-[#0A0C13]">
         <div>
           <Link to={`/tournaments/${slug}`}>
-            <h3 className="text-base sm:text-lg font-bold text-white group-hover:text-cyber-cyan transition-colors line-clamp-1 font-heading">
+            <h3 className="text-lg sm:text-xl font-bold text-white group-hover:text-cyber-cyan transition-colors line-clamp-1 font-heading">
               {title}
             </h3>
           </Link>
 
-          <div className="mt-1.5 flex items-center gap-1.5 text-xs text-slate-400 font-medium">
+          <div className="mt-1.5 flex items-center gap-1.5 text-sm text-slate-400 font-medium">
             <Shield className="w-3.5 h-3.5 text-crimson" />
             <span>Hosted by <strong className="text-slate-200">{organizer?.name || 'Verified Host'}</strong></span>
           </div>
         </div>
 
         {/* Specs Grid */}
-        <div className="grid grid-cols-2 gap-2 text-xs bg-dark-850/80 p-3 rounded-xl border border-white/5">
+        <div className="grid grid-cols-2 gap-2 text-sm bg-dark-850/80 p-3 rounded-xl border border-white/5">
           <div className="space-y-0.5">
-            <p className="text-slate-400 text-[11px] flex items-center gap-1">
-              <Calendar className="w-3 h-3 text-slate-400" /> Starts
+            <p className="text-slate-400 text-xs flex items-center gap-1">
+              <Calendar className="w-3.5 h-3.5 text-slate-400" /> Starts
             </p>
-            <p className="font-bold text-slate-200">{formattedStartDate}</p>
+            <p className="font-bold text-slate-200 text-sm">{formattedStartDate}</p>
           </div>
           <div className="space-y-0.5">
-            <p className="text-slate-400 text-[11px] flex items-center gap-1">
-              <Users className="w-3 h-3 text-slate-400" /> Teams
+            <p className="text-slate-400 text-xs flex items-center gap-1">
+              <Users className="w-3.5 h-3.5 text-slate-400" /> Teams
             </p>
-            <p className="font-bold text-cyber-cyan">
+            <p className="font-bold text-cyber-cyan text-sm">
               {registeredTeamsCount || 0} / {maxTeams}
             </p>
           </div>
           <div className="space-y-0.5 pt-1.5 border-t border-white/5">
-            <p className="text-slate-400 text-[11px] flex items-center gap-1">
-              <MapPin className="w-3 h-3 text-slate-400" /> Format
+            <p className="text-slate-400 text-xs flex items-center gap-1">
+              <MapPin className="w-3.5 h-3.5 text-slate-400" /> Format
             </p>
-            <p className="font-bold text-slate-300">{tournamentType}</p>
+            <p className="font-bold text-slate-300 text-sm">{tournamentType}</p>
           </div>
           <div className="space-y-0.5 pt-1.5 border-t border-white/5">
-            <p className="text-slate-400 text-[11px]">
+            <p className="text-slate-400 text-xs">
               Deadline
             </p>
-            <p className="font-bold text-crimson">{formattedDeadline}</p>
+            <p className="font-bold text-crimson text-sm">{formattedDeadline}</p>
           </div>
         </div>
 
         {/* CTA Button */}
         <Link
           to={`/tournaments/${slug}`}
-          className="w-full flex items-center justify-center gap-2 py-2 rounded-lg bg-white/5 hover:bg-[#E6002B] text-slate-200 hover:text-white font-bold text-xs uppercase tracking-wider transition-colors border border-white/10 hover:border-[#E6002B] font-gaming"
+          className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg bg-white/5 hover:bg-[#E6002B] text-slate-200 hover:text-white font-bold text-sm uppercase tracking-wider transition-colors border border-white/10 hover:border-[#E6002B] font-gaming"
         >
           View Tournament <ArrowRight className="w-3.5 h-3.5" />
         </Link>

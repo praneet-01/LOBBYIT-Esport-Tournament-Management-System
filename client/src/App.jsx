@@ -1,35 +1,37 @@
-import React from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
-import { useAuth } from './context/AuthContext';
+import React from "react";
+import { Routes, Route, Navigate } from "react-router-dom";
+import { useAuth } from "./context/AuthContext";
 
-import Navbar from './components/common/Navbar';
-import Footer from './components/common/Footer';
+import Navbar from "./components/common/Navbar";
+import Footer from "./components/common/Footer";
+import ChatWidget from "./components/common/ChatWidget";
 
-import Home from './pages/Home';
-import Tournaments from './pages/Tournaments';
-import TournamentDetail from './pages/TournamentDetail';
-import RegisterTeam from './pages/RegisterTeam';
-import Games from './pages/Games';
-import GameDetail from './pages/GameDetail';
-import Login from './pages/Login';
-import Register from './pages/Register';
-import UserProfile from './pages/UserProfile';
+import Home from "./pages/Home";
+import Tournaments from "./pages/Tournaments";
+import TournamentDetail from "./pages/TournamentDetail";
+import RegisterTeam from "./pages/RegisterTeam";
+import Games from "./pages/Games";
+import GameDetail from "./pages/GameDetail";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import UserProfile from "./pages/UserProfile";
 
-import OrganizerDashboard from './pages/organizer/OrganizerDashboard';
-import CreateTournament from './pages/organizer/CreateTournament';
-import OrganizerTournaments from './pages/organizer/OrganizerTournaments';
-import OrganizerRegistrations from './pages/organizer/OrganizerRegistrations';
+import OrganizerDashboard from "./pages/organizer/OrganizerDashboard";
+import CreateTournament from "./pages/organizer/CreateTournament";
+import OrganizerTournaments from "./pages/organizer/OrganizerTournaments";
+import OrganizerRegistrations from "./pages/organizer/OrganizerRegistrations";
 
-import TeamDashboard from './pages/team/TeamDashboard';
-import ManageTeam from './pages/team/ManageTeam';
-import TeamRegistrations from './pages/team/TeamRegistrations';
+import TeamDashboard from "./pages/team/TeamDashboard";
+import ManageTeam from "./pages/team/ManageTeam";
+import TeamRegistrations from "./pages/team/TeamRegistrations";
 
 // Protected Route Wrapper for Organizer
 const OrganizerRoute = ({ children }) => {
   const { user, loading } = useAuth();
   if (loading) return null;
   if (!user) return <Navigate to="/login" replace />;
-  if (user.role !== 'Organizer' && user.role !== 'Admin') return <Navigate to="/team/dashboard" replace />;
+  if (user.role !== "Organizer" && user.role !== "Admin")
+    return <Navigate to="/team/dashboard" replace />;
   return children;
 };
 
@@ -38,7 +40,8 @@ const TeamRoute = ({ children }) => {
   const { user, loading } = useAuth();
   if (loading) return null;
   if (!user) return <Navigate to="/login" replace />;
-  if (user.role !== 'Team' && user.role !== 'Player') return <Navigate to="/organizer/dashboard" replace />;
+  if (user.role !== "Team" && user.role !== "Player")
+    return <Navigate to="/organizer/dashboard" replace />;
   return children;
 };
 
@@ -52,7 +55,10 @@ export default function App() {
           <Route path="/" element={<Home />} />
           <Route path="/tournaments" element={<Tournaments />} />
           <Route path="/tournaments/:slug" element={<TournamentDetail />} />
-          <Route path="/tournaments/:slug/register" element={<RegisterTeam />} />
+          <Route
+            path="/tournaments/:slug/register"
+            element={<RegisterTeam />}
+          />
           <Route path="/games" element={<Games />} />
           <Route path="/games/:slug" element={<GameDetail />} />
           <Route path="/login" element={<Login />} />
@@ -140,6 +146,7 @@ export default function App() {
         </Routes>
       </main>
       <Footer />
+      <ChatWidget />
     </div>
   );
 }

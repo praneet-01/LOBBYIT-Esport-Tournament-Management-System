@@ -169,7 +169,7 @@ export default function Login() {
           <h2 className="text-2xl font-black text-white font-gaming tracking-wide uppercase pt-1">
             WELCOME BACK
           </h2>
-          <p className="text-xs text-slate-400">
+          <p className="text-sm text-slate-400">
             Sign in to access tournaments, lineups, and brackets
           </p>
         </div>
@@ -178,7 +178,7 @@ export default function Login() {
         <div className="bg-[#10141E] rounded-xl p-6 sm:p-8 border border-white/10 space-y-5">
           
           {error && (
-            <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-300 text-xs flex items-center gap-2">
+            <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-300 text-sm flex items-center gap-2">
               <AlertCircle className="w-4 h-4 shrink-0 text-red-400" />
               <span>{error}</span>
             </div>
@@ -189,7 +189,7 @@ export default function Login() {
             <button
               type="button"
               onClick={() => { setLoginMode('password'); setError(''); }}
-              className={`py-1.5 text-xs font-gaming uppercase tracking-wider rounded-md font-bold transition-colors cursor-pointer ${
+              className={`py-1.5 text-sm font-gaming uppercase tracking-wider rounded-md font-bold transition-colors cursor-pointer ${
                 loginMode === 'password'
                   ? 'bg-[#151926] text-white border border-white/10'
                   : 'text-slate-400 hover:text-white'
@@ -200,7 +200,7 @@ export default function Login() {
             <button
               type="button"
               onClick={() => { setLoginMode('otp'); setError(''); }}
-              className={`py-1.5 text-xs font-gaming uppercase tracking-wider rounded-md font-bold transition-colors cursor-pointer ${
+              className={`py-1.5 text-sm font-gaming uppercase tracking-wider rounded-md font-bold transition-colors cursor-pointer ${
                 loginMode === 'otp'
                   ? 'bg-[#151926] text-white border border-white/10'
                   : 'text-slate-400 hover:text-white'
@@ -214,11 +214,11 @@ export default function Login() {
             <>
               {/* Quick Demo Credentials */}
               <div className="p-3 rounded-lg bg-[#0B0E17] border border-white/10 space-y-2">
-                <div className="flex items-center justify-between text-[11px]">
+                <div className="flex items-center justify-between text-xs">
                   <span className="font-bold text-slate-300 font-gaming uppercase tracking-wider">
                     Demo Accounts
                   </span>
-                  <span className="text-[10px] text-slate-400">
+                  <span className="text-xs text-slate-400">
                     1-Click Autofill
                   </span>
                 </div>
@@ -226,14 +226,14 @@ export default function Login() {
                   <button
                     type="button"
                     onClick={() => { setEmail('organizer@lobbyit.com'); setPassword('password123'); }}
-                    className="px-2.5 py-1.5 rounded-lg bg-[#141824] hover:bg-[#1A2030] text-slate-200 hover:text-white font-semibold border border-white/10 transition-colors text-xs text-center cursor-pointer font-gaming"
+                    className="px-2.5 py-1.5 rounded-lg bg-[#141824] hover:bg-[#1A2030] text-slate-200 hover:text-white font-semibold border border-white/10 transition-colors text-sm text-center cursor-pointer font-gaming"
                   >
                     Organizer Demo
                   </button>
                   <button
                     type="button"
                     onClick={() => { setEmail('team@lobbyit.com'); setPassword('password123'); }}
-                    className="px-2.5 py-1.5 rounded-lg bg-[#141824] hover:bg-[#1A2030] text-slate-200 hover:text-white font-semibold border border-white/10 transition-colors text-xs text-center cursor-pointer font-gaming"
+                    className="px-2.5 py-1.5 rounded-lg bg-[#141824] hover:bg-[#1A2030] text-slate-200 hover:text-white font-semibold border border-white/10 transition-colors text-sm text-center cursor-pointer font-gaming"
                   >
                     Player Demo
                   </button>
@@ -244,7 +244,7 @@ export default function Login() {
               <form onSubmit={handlePasswordLoginSubmit} className="space-y-4">
                 
                 <div className="space-y-1">
-                  <label className="block text-xs font-semibold text-slate-300">
+                  <label className="block text-sm font-semibold text-slate-300">
                     Email or Username
                   </label>
                   <div className="relative">
@@ -254,20 +254,20 @@ export default function Login() {
                       placeholder="name@example.com"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="w-full pl-9 pr-3 py-2 rounded-lg bg-[#0B0E17] border border-white/15 text-white placeholder-slate-500 text-xs focus:outline-none focus:border-[#E6002B] transition-colors"
+                      className="w-full pl-9 pr-3 py-2 rounded-lg bg-[#0B0E17] border border-white/15 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-[#E6002B] transition-colors"
                     />
                   </div>
                 </div>
 
                 <div className="space-y-1">
                   <div className="flex items-center justify-between">
-                    <label className="block text-xs font-semibold text-slate-300">
+                    <label className="block text-sm font-semibold text-slate-300">
                       Password
                     </label>
                     <button
                       type="button"
                       onClick={() => { setLoginMode('otp'); setOtpEmail(email); }}
-                      className="text-[11px] text-[#E6002B] hover:underline"
+                      className="text-xs text-[#E6002B] hover:underline"
                     >
                       Login with OTP instead?
                     </button>
@@ -279,7 +279,7 @@ export default function Login() {
                       placeholder="••••••••"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="w-full pl-9 pr-3 py-2 rounded-lg bg-[#0B0E17] border border-white/15 text-white placeholder-slate-500 text-xs focus:outline-none focus:border-[#E6002B] transition-colors"
+                      className="w-full pl-9 pr-3 py-2 rounded-lg bg-[#0B0E17] border border-white/15 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-[#E6002B] transition-colors"
                     />
                   </div>
                 </div>
@@ -287,7 +287,7 @@ export default function Login() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full mt-2 py-2.5 rounded-lg bg-[#E6002B] hover:bg-[#C90022] text-white font-bold text-xs uppercase tracking-wider transition-colors flex items-center justify-center gap-1.5 cursor-pointer font-gaming disabled:opacity-50"
+                  className="w-full mt-2 py-2.5 rounded-lg bg-[#E6002B] hover:bg-[#C90022] text-white font-bold text-sm uppercase tracking-wider transition-colors flex items-center justify-center gap-1.5 cursor-pointer font-gaming disabled:opacity-50"
                 >
                   {loading ? (
                     <span>Signing In...</span>
@@ -306,7 +306,7 @@ export default function Login() {
               {!otpSent ? (
                 <form onSubmit={handleSendLoginOtp} className="space-y-4">
                   <div className="space-y-1">
-                    <label className="block text-xs font-semibold text-slate-300">
+                    <label className="block text-sm font-semibold text-slate-300">
                       Registered Email Address
                     </label>
                     <div className="relative">
@@ -316,10 +316,10 @@ export default function Login() {
                         placeholder="name@example.com"
                         value={otpEmail}
                         onChange={(e) => setOtpEmail(e.target.value)}
-                        className="w-full pl-9 pr-3 py-2 rounded-lg bg-[#0B0E17] border border-white/15 text-white placeholder-slate-500 text-xs focus:outline-none focus:border-[#E6002B] transition-colors"
+                        className="w-full pl-9 pr-3 py-2 rounded-lg bg-[#0B0E17] border border-white/15 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-[#E6002B] transition-colors"
                       />
                     </div>
-                    <p className="text-[11px] text-slate-400 pt-0.5">
+                    <p className="text-xs text-slate-400 pt-0.5">
                       We'll send a 6-digit one-time code to authenticate you instantly without a password.
                     </p>
                   </div>
@@ -327,7 +327,7 @@ export default function Login() {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="w-full py-2.5 rounded-lg bg-[#E6002B] hover:bg-[#C90022] text-white font-bold text-xs uppercase tracking-wider transition-colors flex items-center justify-center gap-1.5 cursor-pointer font-gaming disabled:opacity-50"
+                    className="w-full py-2.5 rounded-lg bg-[#E6002B] hover:bg-[#C90022] text-white font-bold text-sm uppercase tracking-wider transition-colors flex items-center justify-center gap-1.5 cursor-pointer font-gaming disabled:opacity-50"
                   >
                     {loading ? (
                       <span>Sending OTP...</span>
@@ -352,7 +352,7 @@ export default function Login() {
                   </button>
 
                   <div className="space-y-2">
-                    <label className="block text-center text-xs font-semibold text-slate-300">
+                    <label className="block text-center text-sm font-semibold text-slate-300">
                       Enter 6-Digit Verification Code
                     </label>
                     <div className="flex justify-center items-center gap-2" onPaste={handlePasteOtp}>
@@ -374,7 +374,7 @@ export default function Login() {
                   <button
                     type="submit"
                     disabled={loading || otpDigits.join('').length !== 6}
-                    className="w-full py-2.5 rounded-lg bg-[#E6002B] hover:bg-[#C90022] text-white font-bold text-xs uppercase tracking-wider transition-colors flex items-center justify-center gap-1.5 cursor-pointer font-gaming disabled:opacity-50"
+                    className="w-full py-2.5 rounded-lg bg-[#E6002B] hover:bg-[#C90022] text-white font-bold text-sm uppercase tracking-wider transition-colors flex items-center justify-center gap-1.5 cursor-pointer font-gaming disabled:opacity-50"
                   >
                     {loading ? (
                       <span>Verifying Code...</span>
@@ -407,7 +407,7 @@ export default function Login() {
             </div>
           )}
 
-          <div className="text-center pt-2 border-t border-white/10 text-xs text-slate-400">
+          <div className="text-center pt-2 border-t border-white/10 text-sm text-slate-400">
             Don't have an account?{' '}
             <Link to="/register" className="font-bold text-white hover:underline">
               Create an account

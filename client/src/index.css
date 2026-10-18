@@ -58,3 +58,44 @@
 .font-heading {
   font-family: 'Plus Jakarta Sans', sans-serif;
 }
+
+/* LEFT EAR: forward, then backward */
+@keyframes earLeftMotion {
+  0%, 100% {
+    transform: perspective(600px) rotateX(-14deg) scaleY(0.97);
+  }
+
+  50% {
+    transform: perspective(600px) rotateX(14deg) scaleY(1);
+  }
+}
+
+/* RIGHT EAR: backward, then forward */
+@keyframes earRightMotion {
+  0%, 100% {
+    transform: perspective(600px) rotateX(14deg) scaleY(1);
+  }
+
+  50% {
+    transform: perspective(600px) rotateX(-14deg) scaleY(0.97);
+  }
+}
+
+.animate-ear-left {
+  transform-origin: 50% 95%;
+  animation: earLeftMotion 1.4s ease-in-out infinite;
+  backface-visibility: hidden;
+}
+
+.animate-ear-right {
+  transform-origin: 50% 95%;
+  animation: earRightMotion 1.4s ease-in-out infinite;
+  backface-visibility: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-ear-left,
+  .animate-ear-right {
+    animation: none;
+  }
+}

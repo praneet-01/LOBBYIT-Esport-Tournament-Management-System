@@ -149,16 +149,16 @@ export default function Home() {
             
             {/* Left Box (Reference: "ESPORTS ARENA") */}
             <div className="w-full max-w-[280px] sm:max-w-[300px] lg:max-w-[320px] space-y-3 pointer-events-auto text-left">
-              <h3 className="text-sm font-bold text-[#FF2E51] font-gaming uppercase tracking-widest">
+              <h3 className="text-base font-bold text-[#FF2E51] font-gaming uppercase tracking-widest">
                 ESPORTS ARENA
               </h3>
-              <p className="text-xs text-slate-300 leading-relaxed">
+              <p className="text-sm text-slate-300 leading-relaxed">
                 Enter the next dimension of competitive gaming. Squad up, compete in elite tournament brackets, and rise to championship victory.
               </p>
               <div className="pt-1">
                 <Link
                   to="/tournaments"
-                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg border border-white/20 hover:border-[#FF2E51] bg-[#10141E]/90 backdrop-blur-md text-white font-bold text-xs uppercase tracking-wider font-gaming transition-colors group"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg border border-white/20 hover:border-[#FF2E51] bg-[#10141E]/90 backdrop-blur-md text-white font-bold text-sm uppercase tracking-wider font-gaming transition-colors group"
                 >
                   <span>EXPLORE NOW</span>
                   <span className="text-[#FF2E51] font-mono tracking-tighter group-hover:translate-x-0.5 transition-transform">///</span>
@@ -168,16 +168,16 @@ export default function Home() {
 
             {/* Right Box (Reference: "THE FUTURE") - Left Aligned */}
             <div className="w-full max-w-[280px] sm:max-w-[300px] lg:max-w-[320px] space-y-3 pointer-events-auto text-left">
-              <h3 className="text-sm font-bold text-[#FF2E51] font-gaming uppercase tracking-widest">
+              <h3 className="text-base font-bold text-[#FF2E51] font-gaming uppercase tracking-widest">
                 THE FUTURE
               </h3>
-              <p className="text-xs text-slate-300 leading-relaxed">
+              <p className="text-sm text-slate-300 leading-relaxed">
                 Automated match lobbies, live bracket progression, anti-cheat roster verification, and instant verified prize payouts.
               </p>
               <div className="pt-1 flex justify-start">
                 <Link
                   to="/register?role=Organizer"
-                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg border border-white/20 hover:border-white/40 bg-[#10141E]/90 backdrop-blur-md text-slate-200 hover:text-white font-bold text-xs uppercase tracking-wider font-gaming transition-colors"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg border border-white/20 hover:border-white/40 bg-[#10141E]/90 backdrop-blur-md text-slate-200 hover:text-white font-bold text-sm uppercase tracking-wider font-gaming transition-colors"
                 >
                   <Play className="w-3 h-3 text-[#FF2E51] fill-[#FF2E51]" />
                   <span>HOST TOURNAMENT</span>

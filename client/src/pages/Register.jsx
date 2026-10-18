@@ -203,7 +203,7 @@ export default function Register() {
           <h2 className="text-2xl font-black text-white font-gaming tracking-wide uppercase pt-1">
             {step === 'details' ? 'JOIN THE ARENA' : 'VERIFY YOUR EMAIL'}
           </h2>
-          <p className="text-xs text-slate-400">
+          <p className="text-sm text-slate-400">
             {step === 'details' 
               ? 'Create your account to organize tournaments or compete in events'
               : `Enter the 6-digit code sent to ${formData.email}`
@@ -215,7 +215,7 @@ export default function Register() {
         <div className="bg-[#10141E] rounded-xl p-6 sm:p-8 border border-white/10 space-y-5">
           
           {error && (
-            <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-300 text-xs flex items-center gap-2">
+            <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-300 text-sm flex items-center gap-2">
               <AlertCircle className="w-4 h-4 shrink-0 text-red-400" />
               <span>{error}</span>
             </div>
@@ -225,7 +225,7 @@ export default function Register() {
             <>
               {/* Role Choice: ONLY PLAYER & ORGANIZER */}
               <div className="space-y-1.5">
-                <label className="block text-xs font-semibold text-slate-300">
+                <label className="block text-sm font-semibold text-slate-300">
                   Select Your Role
                 </label>
                 <div className="grid grid-cols-2 gap-3">
@@ -242,8 +242,8 @@ export default function Register() {
                       <User className="w-4 h-4" />
                     </div>
                     <div>
-                      <p className="font-bold text-xs font-gaming text-white">PLAYER</p>
-                      <p className="text-[11px] text-slate-400">Solo Gamer / Squad Leader</p>
+                      <p className="font-bold text-sm font-gaming text-white">PLAYER</p>
+                      <p className="text-xs text-slate-400">Solo Gamer / Squad Leader</p>
                     </div>
                   </button>
 
@@ -260,8 +260,8 @@ export default function Register() {
                       <Shield className="w-4 h-4" />
                     </div>
                     <div>
-                      <p className="font-bold text-xs font-gaming text-white">ORGANIZER</p>
-                      <p className="text-[11px] text-slate-400">Host & Manage Tournaments</p>
+                      <p className="font-bold text-sm font-gaming text-white">ORGANIZER</p>
+                      <p className="text-xs text-slate-400">Host & Manage Tournaments</p>
                     </div>
                   </button>
                 </div>
@@ -272,7 +272,7 @@ export default function Register() {
                 {/* For Organizer: Gamer tag is NOT displayed, only Name, Email, Password */}
                 {formData.role === 'Organizer' ? (
                   <div className="space-y-1">
-                    <label className="block text-xs font-semibold text-slate-300">
+                    <label className="block text-sm font-semibold text-slate-300">
                       Organization / Host Name
                     </label>
                     <div className="relative">
@@ -283,7 +283,7 @@ export default function Register() {
                         placeholder="Apex Esports Series or Clan Name"
                         value={formData.name}
                         onChange={handleChange}
-                        className="w-full pl-9 pr-3 py-2 rounded-lg bg-[#0B0E17] border border-white/15 text-white placeholder-slate-500 text-xs focus:outline-none focus:border-[#E6002B] transition-colors"
+                        className="w-full pl-9 pr-3 py-2 rounded-lg bg-[#0B0E17] border border-white/15 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-[#E6002B] transition-colors"
                       />
                     </div>
                   </div>
@@ -291,7 +291,7 @@ export default function Register() {
                   /* For Player: Full Name & Gamer Tag are displayed */
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div className="space-y-1">
-                      <label className="block text-xs font-semibold text-slate-300">
+                      <label className="block text-sm font-semibold text-slate-300">
                         Full Name
                       </label>
                       <div className="relative">
@@ -302,13 +302,13 @@ export default function Register() {
                           placeholder="Alex Morgan"
                           value={formData.name}
                           onChange={handleChange}
-                          className="w-full pl-9 pr-3 py-2 rounded-lg bg-[#0B0E17] border border-white/15 text-white placeholder-slate-500 text-xs focus:outline-none focus:border-[#E6002B] transition-colors"
+                          className="w-full pl-9 pr-3 py-2 rounded-lg bg-[#0B0E17] border border-white/15 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-[#E6002B] transition-colors"
                         />
                       </div>
                     </div>
 
                     <div className="space-y-1">
-                      <label className="block text-xs font-semibold text-slate-300">
+                      <label className="block text-sm font-semibold text-slate-300">
                         Gamer Handle / Tag
                       </label>
                       <div className="relative">
@@ -319,7 +319,7 @@ export default function Register() {
                           placeholder="ShadowHunter"
                           value={formData.username}
                           onChange={handleChange}
-                          className="w-full pl-9 pr-3 py-2 rounded-lg bg-[#0B0E17] border border-white/15 text-white placeholder-slate-500 text-xs focus:outline-none focus:border-[#E6002B] transition-colors"
+                          className="w-full pl-9 pr-3 py-2 rounded-lg bg-[#0B0E17] border border-white/15 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-[#E6002B] transition-colors"
                         />
                       </div>
                     </div>
@@ -327,7 +327,7 @@ export default function Register() {
                 )}
 
                 <div className="space-y-1">
-                  <label className="block text-xs font-semibold text-slate-300">
+                  <label className="block text-sm font-semibold text-slate-300">
                     Official Email Address
                   </label>
                   <div className="relative">
@@ -338,13 +338,13 @@ export default function Register() {
                       placeholder="name@example.com"
                       value={formData.email}
                       onChange={handleChange}
-                      className="w-full pl-9 pr-3 py-2 rounded-lg bg-[#0B0E17] border border-white/15 text-white placeholder-slate-500 text-xs focus:outline-none focus:border-[#E6002B] transition-colors"
+                      className="w-full pl-9 pr-3 py-2 rounded-lg bg-[#0B0E17] border border-white/15 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-[#E6002B] transition-colors"
                     />
                   </div>
                 </div>
 
                 <div className="space-y-1">
-                  <label className="block text-xs font-semibold text-slate-300">
+                  <label className="block text-sm font-semibold text-slate-300">
                     Password
                   </label>
                   <div className="relative">
@@ -355,7 +355,7 @@ export default function Register() {
                       placeholder="At least 6 characters"
                       value={formData.password}
                       onChange={handleChange}
-                      className="w-full pl-9 pr-3 py-2 rounded-lg bg-[#0B0E17] border border-white/15 text-white placeholder-slate-500 text-xs focus:outline-none focus:border-[#E6002B] transition-colors"
+                      className="w-full pl-9 pr-3 py-2 rounded-lg bg-[#0B0E17] border border-white/15 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-[#E6002B] transition-colors"
                     />
                   </div>
                 </div>
@@ -363,7 +363,7 @@ export default function Register() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full mt-2 py-2.5 rounded-lg bg-[#E6002B] hover:bg-[#C90022] text-white font-bold text-xs uppercase tracking-wider transition-colors flex items-center justify-center gap-1.5 cursor-pointer font-gaming disabled:opacity-50"
+                  className="w-full mt-2 py-2.5 rounded-lg bg-[#E6002B] hover:bg-[#C90022] text-white font-bold text-sm uppercase tracking-wider transition-colors flex items-center justify-center gap-1.5 cursor-pointer font-gaming disabled:opacity-50"
                 >
                   {loading ? (
                     <span>Sending Verification Code...</span>
@@ -384,7 +384,7 @@ export default function Register() {
               <button
                 type="button"
                 onClick={() => setStep('details')}
-                className="text-[11px] text-slate-400 hover:text-white flex items-center gap-1 cursor-pointer transition-colors"
+                className="text-xs text-slate-400 hover:text-white flex items-center gap-1 cursor-pointer transition-colors"
               >
                 <ArrowLeft className="w-3.5 h-3.5" />
                 <span>Change registration details</span>
@@ -392,7 +392,7 @@ export default function Register() {
 
               {/* 6 Digit Inputs */}
               <div className="space-y-2">
-                <label className="block text-center text-xs font-semibold text-slate-300">
+                <label className="block text-center text-sm font-semibold text-slate-300">
                   Enter 6-Digit Code
                 </label>
                 <div className="flex justify-center items-center gap-2 sm:gap-3" onPaste={handlePasteOtp}>
@@ -414,7 +414,7 @@ export default function Register() {
               <button
                 type="submit"
                 disabled={loading || otp.join('').length !== 6}
-                className="w-full py-2.5 rounded-lg bg-[#E6002B] hover:bg-[#C90022] text-white font-bold text-xs uppercase tracking-wider transition-colors flex items-center justify-center gap-1.5 cursor-pointer font-gaming disabled:opacity-50"
+                className="w-full py-2.5 rounded-lg bg-[#E6002B] hover:bg-[#C90022] text-white font-bold text-sm uppercase tracking-wider transition-colors flex items-center justify-center gap-1.5 cursor-pointer font-gaming disabled:opacity-50"
               >
                 {loading ? (
                   <span>Verifying Code...</span>
@@ -427,7 +427,7 @@ export default function Register() {
               </button>
 
               {/* Resend button */}
-              <div className="text-center text-xs text-slate-400">
+              <div className="text-center text-sm text-slate-400">
                 Didn't receive the code?{' '}
                 {resendTimer > 0 ? (
                   <span className="text-slate-500">Resend in {resendTimer}s</span>
@@ -446,7 +446,7 @@ export default function Register() {
             </form>
           )}
 
-          <div className="text-center pt-2 border-t border-white/10 text-xs text-slate-400">
+          <div className="text-center pt-2 border-t border-white/10 text-sm text-slate-400">
             Already have an account?{' '}
             <Link to="/login" className="font-bold text-white hover:underline">
               Sign in

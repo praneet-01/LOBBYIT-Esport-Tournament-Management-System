@@ -12,8 +12,20 @@ import {
   ChevronLeft, 
   FileText, 
   Globe, 
-  Lock 
+  Lock,
+  Gamepad2,
+  Hash,
+  Key,
+  Copy,
+  Check,
+  Eye,
+  EyeOff,
+  Radio,
+  Clock,
+  RefreshCw,
+  Edit3
 } from 'lucide-react';
+import MatchRoomManagerModal from '../components/organizer/MatchRoomManagerModal';
 
 export default function TournamentDetail() {
   const { slug } = useParams();
@@ -23,21 +35,46 @@ export default function TournamentDetail() {
   const [tournament, setTournament] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [showRoomModal, setShowRoomModal] = useState(false);
+  const [copiedKey, setCopiedKey] = useState('');
+  const [showPasswordMap, setShowPasswordMap] = useState({});
+  const [refreshing, setRefreshing] = useState(false);
+
+  const fetchDetail = async (isManual = false) => {
+    if (isManual) setRefreshing(true);
+    try {
+      const response = await api.get(`/tournaments/slug/${slug}`);
+      setTournament(response.data);
+    } catch (err) {
+      if (!tournament) setError(err.response?.data?.message || 'Tournament not found');
+    } finally {
+      setLoading(false);
+      if (isManual) setRefreshing(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchDetail = async () => {
-      try {
-        const response = await api.get(`/tournaments/slug/${slug}`);
-        setTournament(response.data);
-      } catch (err) {
-        setError(err.response?.data?.message || 'Tournament not found');
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchDetail();
+    // 6-second polling for real-time match room sync
+    const interval = setInterval(() => {
+      fetchDetail(false);
+    }, 6000);
+    return () => clearInterval(interval);
   }, [slug]);
+
+  const copyToClipboard = (text, key) => {
+    if (!text) return;
+    navigator.clipboard.writeText(text);
+    setCopiedKey(key);
+    setTimeout(() => setCopiedKey(''), 2000);
+  };
+
+  const togglePasswordVisibility = (matchId) => {
+    setShowPasswordMap((prev) => ({
+      ...prev,
+      [matchId]: !prev[matchId]
+    }));
+  };
 
   if (loading) {
     return (
@@ -180,6 +217,188 @@ export default function TournamentDetail() {
             </p>
           </div>
 
+          {/* Match Rounds, Maps & Custom Room Credentials */}
+          <div className="bg-[#10141E] rounded-xl p-6 border border-white/10 space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-3">
+              <div className="flex items-center gap-2">
+                <Gamepad2 className="w-5 h-5 text-[#E6002B]" />
+                <div>
+                  <h3 className="text-lg font-black text-white font-gaming uppercase tracking-wide">
+                    Match Rounds & Map Rotation
+                  </h3>
+                  <p className="text-xs text-slate-400">
+                    Live room credentials automatically sync within 10 seconds.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                {user && (user.role === 'Organizer' || user.role === 'Admin') && (tournament.organizer?._id === user._id || tournament.organizer === user._id) && (
+                  <button
+                    onClick={() => setShowRoomModal(true)}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#E6002B] hover:bg-[#C90022] text-white font-bold text-xs font-gaming uppercase tracking-wider transition-colors cursor-pointer"
+                  >
+                    <Edit3 className="w-3.5 h-3.5" /> Manage Room IDs & Maps
+                  </button>
+                )}
+                <button
+                  onClick={() => fetchDetail(true)}
+                  disabled={refreshing}
+                  className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white border border-white/10 cursor-pointer"
+                  title="Check for room credential updates"
+                >
+                  <RefreshCw className={`w-3.5 h-3.5 text-cyan-400 ${refreshing ? 'animate-spin' : ''}`} />
+                </button>
+              </div>
+            </div>
+
+            {/* Matches list */}
+            {tournament.matches && tournament.matches.length > 0 ? (
+              <div className="space-y-3">
+                {tournament.matches.map((match, idx) => {
+                  const isLive = match.status === 'live' || Boolean(match.roomId && match.status !== 'completed');
+                  const isPasswordVisible = showPasswordMap[match._id];
+
+                  return (
+                    <div
+                      key={match._id || idx}
+                      className={`p-4 rounded-xl border transition-all ${
+                        isLive 
+                          ? 'bg-gradient-to-r from-emerald-950/20 via-[#141926] to-[#10141E] border-emerald-500/40 shadow-lg shadow-emerald-500/5' 
+                          : 'bg-[#0B0E17] border-white/10'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between gap-2 border-b border-white/5 pb-2.5">
+                        <div className="flex items-center gap-2">
+                          <span className="w-6 h-6 rounded-md bg-white/10 flex items-center justify-center font-mono font-bold text-white text-xs">
+                            #{match.matchNumber || idx + 1}
+                          </span>
+                          <span className="font-bold text-white text-xs font-gaming">
+                            {match.title || `Match ${match.matchNumber || idx + 1}`}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="px-2.5 py-1 rounded-md text-xs font-bold uppercase tracking-wider bg-orange-500/15 text-orange-400 border border-orange-500/30 font-gaming">
+                            🗺️ {match.map}
+                          </span>
+                          <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${
+                            isLive
+                              ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 animate-pulse'
+                              : 'bg-white/10 text-slate-300'
+                          }`}>
+                            {match.status || 'upcoming'}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Credentials Block */}
+                      <div className="mt-3">
+                        {tournament.isRoomUnlocked ? (
+                          match.roomId ? (
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 rounded-lg bg-black/60 border border-white/10 text-xs">
+                              <div className="flex items-center justify-between">
+                                <div>
+                                  <span className="text-[10px] uppercase font-bold text-slate-400 block flex items-center gap-1">
+                                    <Hash className="w-3 h-3 text-cyan-400" /> Room ID
+                                  </span>
+                                  <span className="font-mono font-bold text-white text-sm">
+                                    {match.roomId}
+                                  </span>
+                                </div>
+                                <button
+                                  onClick={() => copyToClipboard(match.roomId, `room-${match._id}`)}
+                                  className="px-2.5 py-1 rounded bg-white/10 hover:bg-white/20 text-white font-bold text-xs flex items-center gap-1 cursor-pointer"
+                                >
+                                  {copiedKey === `room-${match._id}` ? <span className="text-emerald-400 flex items-center gap-1"><Check className="w-3 h-3" /> Copied</span> : <Copy className="w-3 h-3" />}
+                                </button>
+                              </div>
+
+                              <div className="flex items-center justify-between">
+                                <div>
+                                  <span className="text-[10px] uppercase font-bold text-slate-400 block flex items-center gap-1">
+                                    <Key className="w-3 h-3 text-emerald-400" /> Password
+                                  </span>
+                                  <span className="font-mono font-bold text-emerald-400 text-sm">
+                                    {isPasswordVisible ? match.password || 'None' : '••••••••'}
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <button
+                                    onClick={() => togglePasswordVisibility(match._id)}
+                                    className="p-1 rounded bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white"
+                                  >
+                                    {isPasswordVisible ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                                  </button>
+                                  <button
+                                    onClick={() => copyToClipboard(match.password, `pass-${match._id}`)}
+                                    className="px-2.5 py-1 rounded bg-white/10 hover:bg-white/20 text-white font-bold text-xs flex items-center gap-1 cursor-pointer"
+                                  >
+                                    {copiedKey === `pass-${match._id}` ? <span className="text-emerald-400 flex items-center gap-1"><Check className="w-3 h-3" /> Copied</span> : <Copy className="w-3 h-3" />}
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="p-3 rounded-lg bg-[#0B0E17] border border-white/5 text-center text-xs text-slate-400">
+                              <span>⏳ Room ID & Password will be released 10-15 mins before match start.</span>
+                            </div>
+                          )
+                        ) : tournament.userRegistrationStatus === 'pending' ? (
+                          <div className="p-3.5 rounded-lg bg-amber-500/10 border border-amber-500/25 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+                            <span className="flex items-center gap-2 text-amber-300 font-semibold">
+                              <Clock className="w-4 h-4 text-amber-400 shrink-0 animate-spin" />
+                              Application Pending Organizer Approval: Room ID & Password will unlock automatically once your squad entry is accepted.
+                            </span>
+                            <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-amber-500/20 text-amber-300 self-start sm:self-auto font-gaming">
+                              Pending Review
+                            </span>
+                          </div>
+                        ) : tournament.userRegistrationStatus === 'rejected' ? (
+                          <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/25 text-xs text-red-400">
+                            Registration Declined: You do not have access to room credentials for this tournament.
+                          </div>
+                        ) : (
+                          <div className="p-3 rounded-lg bg-[#0B0E17] border border-white/5 flex items-center justify-between text-xs text-slate-400">
+                            <span className="flex items-center gap-1.5">
+                              <Lock className="w-3.5 h-3.5 text-amber-400" />
+                              Custom Room ID & Password are locked for registered squads only.
+                            </span>
+                            {isRegistrationOpen && (
+                              <button
+                                onClick={() => navigate(`/tournaments/${slug}/register`)}
+                                className="text-cyan-400 hover:underline font-bold text-[11px]"
+                              >
+                                Register Now ➔
+                              </button>
+                            )}
+                          </div>
+                        )}
+
+                        {match.customNote && (
+                          <p className="text-[11px] text-cyan-300 mt-2 bg-cyan-950/20 p-2 rounded border border-cyan-500/20">
+                            <strong>Note:</strong> {match.customNote}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="p-6 rounded-xl bg-[#0B0E17] border border-white/5 text-center space-y-1">
+                <p className="text-xs text-slate-400">No match rounds scheduled yet.</p>
+                {user && (user.role === 'Organizer' || user.role === 'Admin') && (tournament.organizer?._id === user._id || tournament.organizer === user._id) && (
+                  <button
+                    onClick={() => setShowRoomModal(true)}
+                    className="mt-2 text-xs text-[#E6002B] hover:underline font-bold"
+                  >
+                    + Add first match round & map
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+
           {/* Tournament Rules */}
           <div className="bg-[#10141E] rounded-xl p-6 border border-white/10 space-y-3">
             <h3 className="text-lg font-black text-white font-gaming flex items-center gap-2">
@@ -308,6 +527,15 @@ export default function TournamentDetail() {
         </div>
 
       </div>
+
+      {/* Organizer Match & Room Manager Modal */}
+      {showRoomModal && (
+        <MatchRoomManagerModal
+          tournament={tournament}
+          onClose={() => setShowRoomModal(false)}
+          onUpdated={() => fetchDetail(true)}
+        />
+      )}
 
     </div>
   );

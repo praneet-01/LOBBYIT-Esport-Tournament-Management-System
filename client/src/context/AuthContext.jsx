@@ -39,6 +39,17 @@ export const AuthProvider = ({ children }) => {
       const { token: jwtToken, ...userData } = response.data;
       
       localStorage.setItem('token', jwtToken);
+      try {
+        localStorage.setItem('lobbyit_last_account', JSON.stringify({
+          name: userData.name,
+          username: userData.username,
+          email: userData.email,
+          role: userData.role,
+          avatar: userData.avatar
+        }));
+        localStorage.setItem('lobbyit_remember_identity', userData.email || userData.username);
+      } catch (e) {}
+
       setToken(jwtToken);
       setUser(userData);
       return userData;
@@ -56,6 +67,17 @@ export const AuthProvider = ({ children }) => {
       const { token: jwtToken, ...userData } = response.data;
       
       localStorage.setItem('token', jwtToken);
+      try {
+        localStorage.setItem('lobbyit_last_account', JSON.stringify({
+          name: userData.name,
+          username: userData.username,
+          email: userData.email,
+          role: userData.role,
+          avatar: userData.avatar
+        }));
+        localStorage.setItem('lobbyit_remember_identity', userData.email || userData.username);
+      } catch (e) {}
+
       setToken(jwtToken);
       setUser(userData);
       return userData;
@@ -85,6 +107,17 @@ export const AuthProvider = ({ children }) => {
       const { token: jwtToken, ...userData } = response.data;
       
       localStorage.setItem('token', jwtToken);
+      try {
+        localStorage.setItem('lobbyit_last_account', JSON.stringify({
+          name: userData.name,
+          username: userData.username,
+          email: userData.email,
+          role: userData.role,
+          avatar: userData.avatar
+        }));
+        localStorage.setItem('lobbyit_remember_identity', userData.email || userData.username);
+      } catch (e) {}
+
       setToken(jwtToken);
       setUser(userData);
       return userData;
@@ -102,6 +135,17 @@ export const AuthProvider = ({ children }) => {
       const { token: jwtToken, ...userData } = response.data;
       
       localStorage.setItem('token', jwtToken);
+      try {
+        localStorage.setItem('lobbyit_last_account', JSON.stringify({
+          name: userData.name,
+          username: userData.username,
+          email: userData.email,
+          role: userData.role,
+          avatar: userData.avatar
+        }));
+        localStorage.setItem('lobbyit_remember_identity', userData.email || userData.username);
+      } catch (e) {}
+
       setToken(jwtToken);
       setUser(userData);
       return userData;

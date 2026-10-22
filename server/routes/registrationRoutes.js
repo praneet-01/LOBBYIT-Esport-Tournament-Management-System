@@ -3,6 +3,7 @@ const router = express.Router();
 const {
   createRegistration,
   getMyRegistrations,
+  getMyRegisteredMatches,
   getRegistrationById,
   acceptRegistration,
   rejectRegistration
@@ -12,6 +13,7 @@ const { authorize } = require('../middleware/role');
 
 router.post('/', protect, authorize('Player', 'Team'), createRegistration);
 router.get('/my', protect, authorize('Player', 'Team'), getMyRegistrations);
+router.get('/my-matches', protect, authorize('Player', 'Team'), getMyRegisteredMatches);
 router.get('/:id', protect, getRegistrationById);
 
 router.patch('/:id/accept', protect, authorize('Organizer'), acceptRegistration);

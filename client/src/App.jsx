@@ -24,6 +24,7 @@ import OrganizerRegistrations from "./pages/organizer/OrganizerRegistrations";
 import TeamDashboard from "./pages/team/TeamDashboard";
 import ManageTeam from "./pages/team/ManageTeam";
 import TeamRegistrations from "./pages/team/TeamRegistrations";
+import MyMatches from "./pages/team/MyMatches";
 
 // Protected Route Wrapper for Organizer
 const OrganizerRoute = ({ children }) => {
@@ -137,6 +138,14 @@ export default function App() {
             element={
               <TeamRoute>
                 <TeamRegistrations />
+              </TeamRoute>
+            }
+          />
+          <Route
+            path="/my-matches"
+            element={
+              <TeamRoute>
+                <MyMatches />
               </TeamRoute>
             }
           />

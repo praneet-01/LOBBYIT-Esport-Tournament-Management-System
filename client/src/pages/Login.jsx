@@ -1,28 +1,43 @@
-import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import { AlertCircle, ArrowRight, Lock, Mail, KeyRound, CheckCircle2, RotateCcw, ArrowLeft } from 'lucide-react';
+import React, { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import {
+  AlertCircle,
+  ArrowRight,
+  Lock,
+  Mail,
+  KeyRound,
+  CheckCircle2,
+  RotateCcw,
+  ArrowLeft,
+} from "lucide-react";
 
 export default function Login() {
   const navigate = useNavigate();
   const { login, sendOtp, verifyOtpLogin } = useAuth();
 
   // Mode: 'password' or 'otp'
-  const [loginMode, setLoginMode] = useState('password');
-  
-  // Password mode state
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [loginMode, setLoginMode] = useState("password");
+
+  // Remember Me & Prefill from localStorage
+  const [rememberMe, setRememberMe] = useState(() => {
+    return localStorage.getItem("lobbyit_remember_me") !== "false";
+  });
+
+  const [email, setEmail] = useState(() => {
+    return localStorage.getItem("lobbyit_remember_identity") || "";
+  });
+  const [password, setPassword] = useState("");
 
   // OTP mode state
-  const [otpEmail, setOtpEmail] = useState('');
-  const [otpDigits, setOtpDigits] = useState(['', '', '', '', '', '']);
+  const [otpEmail, setOtpEmail] = useState("");
+  const [otpDigits, setOtpDigits] = useState(["", "", "", "", "", ""]);
   const [otpSent, setOtpSent] = useState(false);
   const [devOtpCode, setDevOtpCode] = useState(null);
   const [resendTimer, setResendTimer] = useState(0);
 
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   useEffect(() => {
     let interval = null;
@@ -37,22 +52,32 @@ export default function Login() {
   // Handle Standard Password Login
   const handlePasswordLoginSubmit = async (e) => {
     e.preventDefault();
-    setError('');
+    setError("");
     if (!email || !password) {
-      setError('Please enter your email/username and password');
+      setError("Please enter your email/username and password");
       return;
     }
 
     setLoading(true);
     try {
       const loggedUser = await login(email, password);
-      if (loggedUser.role === 'Organizer') {
-        navigate('/organizer/dashboard');
+
+      // Persist or clear Remember Me
+      if (rememberMe) {
+        localStorage.setItem("lobbyit_remember_me", "true");
+        localStorage.setItem("lobbyit_remember_identity", email.trim());
       } else {
-        navigate('/tournaments');
+        localStorage.setItem("lobbyit_remember_me", "false");
+        localStorage.removeItem("lobbyit_remember_identity");
+      }
+
+      if (loggedUser.role === "Organizer") {
+        navigate("/organizer/dashboard");
+      } else {
+        navigate("/tournaments");
       }
     } catch (err) {
-      setError(err.message || 'Invalid login credentials');
+      setError(err.message || "Invalid login credentials");
     } finally {
       setLoading(false);
     }
@@ -61,9 +86,9 @@ export default function Login() {
   // Step 1 of OTP Login: Send OTP
   const handleSendLoginOtp = async (e) => {
     e.preventDefault();
-    setError('');
+    setError("");
     if (!otpEmail) {
-      setError('Please enter your registered email address');
+      setError("Please enter your registered email address");
       return;
     }
 
@@ -71,7 +96,7 @@ export default function Login() {
     try {
       const response = await sendOtp({
         email: otpEmail,
-        purpose: 'login'
+        purpose: "login",
       });
 
       if (response?.devOtp) {
@@ -80,7 +105,7 @@ export default function Login() {
       setResendTimer(30);
       setOtpSent(true);
     } catch (err) {
-      setError(err.message || 'Failed to send login code');
+      setError(err.message || "Failed to send login code");
     } finally {
       setLoading(false);
     }
@@ -100,7 +125,7 @@ export default function Login() {
   };
 
   const handleOtpDigitKeyDown = (index, e) => {
-    if (e.key === 'Backspace' && !otpDigits[index] && index > 0) {
+    if (e.key === "Backspace" && !otpDigits[index] && index > 0) {
       const prevInput = document.getElementById(`login-otp-${index - 1}`);
       if (prevInput) prevInput.focus();
     }
@@ -108,9 +133,12 @@ export default function Login() {
 
   const handlePasteOtp = (e) => {
     e.preventDefault();
-    const pastedData = e.clipboardData.getData('text').trim().replace(/[^0-9]/g, '');
+    const pastedData = e.clipboardData
+      .getData("text")
+      .trim()
+      .replace(/[^0-9]/g, "");
     if (pastedData.length >= 6) {
-      const digits = pastedData.slice(0, 6).split('');
+      const digits = pastedData.slice(0, 6).split("");
       setOtpDigits(digits);
       const lastInput = document.getElementById(`login-otp-5`);
       if (lastInput) lastInput.focus();
@@ -119,18 +147,18 @@ export default function Login() {
 
   const handleAutofillDevOtp = () => {
     if (devOtpCode && devOtpCode.length === 6) {
-      setOtpDigits(devOtpCode.split(''));
+      setOtpDigits(devOtpCode.split(""));
     }
   };
 
   // Step 2 of OTP Login: Verify OTP and Log In
   const handleVerifyLoginOtp = async (e) => {
     e.preventDefault();
-    setError('');
+    setError("");
 
-    const otpString = otpDigits.join('');
+    const otpString = otpDigits.join("");
     if (otpString.length !== 6) {
-      setError('Please enter the 6-digit verification code');
+      setError("Please enter the 6-digit verification code");
       return;
     }
 
@@ -138,16 +166,16 @@ export default function Login() {
     try {
       const loggedUser = await verifyOtpLogin({
         email: otpEmail,
-        otp: otpString
+        otp: otpString,
       });
 
-      if (loggedUser.role === 'Organizer') {
-        navigate('/organizer/dashboard');
+      if (loggedUser.role === "Organizer") {
+        navigate("/organizer/dashboard");
       } else {
-        navigate('/tournaments');
+        navigate("/tournaments");
       }
     } catch (err) {
-      setError(err.message || 'Verification failed. Please check the code.');
+      setError(err.message || "Verification failed. Please check the code.");
     } finally {
       setLoading(false);
     }
@@ -156,14 +184,14 @@ export default function Login() {
   return (
     <div className="min-h-[85vh] flex items-center justify-center px-4 py-12 bg-black">
       <div className="w-full max-w-md space-y-6">
-        
         {/* Brand Header */}
         <div className="text-center space-y-2">
           <Link to="/" className="inline-block py-1">
-            <img 
-              src="/images/lobbyit-logo-transparent.png" 
-              alt="LOBBYIT" 
-              className="h-9 w-auto mx-auto object-contain" 
+            <img
+              // src="/images/lobbyit-logo-transparent.png"
+              src="/images/kriditam.jpeg"
+              alt="LOBBYIT"
+              className="h-12 w-auto mx-auto object-contain"
             />
           </Link>
           <h2 className="text-2xl font-black text-white font-gaming tracking-wide uppercase pt-1">
@@ -176,7 +204,6 @@ export default function Login() {
 
         {/* Login Card */}
         <div className="bg-[#10141E] rounded-xl p-6 sm:p-8 border border-white/10 space-y-5">
-          
           {error && (
             <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-300 text-sm flex items-center gap-2">
               <AlertCircle className="w-4 h-4 shrink-0 text-red-400" />
@@ -188,29 +215,35 @@ export default function Login() {
           <div className="grid grid-cols-2 p-1 bg-[#0B0E17] border border-white/10 rounded-lg">
             <button
               type="button"
-              onClick={() => { setLoginMode('password'); setError(''); }}
+              onClick={() => {
+                setLoginMode("password");
+                setError("");
+              }}
               className={`py-1.5 text-sm font-gaming uppercase tracking-wider rounded-md font-bold transition-colors cursor-pointer ${
-                loginMode === 'password'
-                  ? 'bg-[#151926] text-white border border-white/10'
-                  : 'text-slate-400 hover:text-white'
+                loginMode === "password"
+                  ? "bg-[#151926] text-white border border-white/10"
+                  : "text-slate-400 hover:text-white"
               }`}
             >
               Password
             </button>
             <button
               type="button"
-              onClick={() => { setLoginMode('otp'); setError(''); }}
+              onClick={() => {
+                setLoginMode("otp");
+                setError("");
+              }}
               className={`py-1.5 text-sm font-gaming uppercase tracking-wider rounded-md font-bold transition-colors cursor-pointer ${
-                loginMode === 'otp'
-                  ? 'bg-[#151926] text-white border border-white/10'
-                  : 'text-slate-400 hover:text-white'
+                loginMode === "otp"
+                  ? "bg-[#151926] text-white border border-white/10"
+                  : "text-slate-400 hover:text-white"
               }`}
             >
               Email OTP
             </button>
           </div>
 
-          {loginMode === 'password' ? (
+          {loginMode === "password" ? (
             <>
               {/* Quick Demo Credentials */}
               <div className="p-3 rounded-lg bg-[#0B0E17] border border-white/10 space-y-2">
@@ -225,14 +258,20 @@ export default function Login() {
                 <div className="grid grid-cols-2 gap-2">
                   <button
                     type="button"
-                    onClick={() => { setEmail('organizer@lobbyit.com'); setPassword('password123'); }}
+                    onClick={() => {
+                      setEmail("organizer@lobbyit.com");
+                      setPassword("password123");
+                    }}
                     className="px-2.5 py-1.5 rounded-lg bg-[#141824] hover:bg-[#1A2030] text-slate-200 hover:text-white font-semibold border border-white/10 transition-colors text-sm text-center cursor-pointer font-gaming"
                   >
                     Organizer Demo
                   </button>
                   <button
                     type="button"
-                    onClick={() => { setEmail('team@lobbyit.com'); setPassword('password123'); }}
+                    onClick={() => {
+                      setEmail("team@lobbyit.com");
+                      setPassword("password123");
+                    }}
                     className="px-2.5 py-1.5 rounded-lg bg-[#141824] hover:bg-[#1A2030] text-slate-200 hover:text-white font-semibold border border-white/10 transition-colors text-sm text-center cursor-pointer font-gaming"
                   >
                     Player Demo
@@ -241,17 +280,20 @@ export default function Login() {
               </div>
 
               {/* Password Form */}
-              <form onSubmit={handlePasswordLoginSubmit} className="space-y-4">
-                
+              <form onSubmit={handlePasswordLoginSubmit} autoComplete="on" className="space-y-4">
                 <div className="space-y-1">
-                  <label className="block text-sm font-semibold text-slate-300">
-                    Email or Username
+                  <label htmlFor="login-username" className="block text-sm font-semibold text-slate-300">
+                    Email or Gamer Handle
                   </label>
                   <div className="relative">
                     <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
                     <input
+                      id="login-username"
+                      name="username"
                       type="text"
-                      placeholder="name@example.com"
+                      autoComplete="username"
+                      required
+                      placeholder="name@gmail.com or @gamerhandle"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       className="w-full pl-9 pr-3 py-2 rounded-lg bg-[#0B0E17] border border-white/15 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-[#E6002B] transition-colors"
@@ -261,12 +303,15 @@ export default function Login() {
 
                 <div className="space-y-1">
                   <div className="flex items-center justify-between">
-                    <label className="block text-sm font-semibold text-slate-300">
+                    <label htmlFor="login-password" className="block text-sm font-semibold text-slate-300">
                       Password
                     </label>
                     <button
                       type="button"
-                      onClick={() => { setLoginMode('otp'); setOtpEmail(email); }}
+                      onClick={() => {
+                        setLoginMode("otp");
+                        setOtpEmail(email);
+                      }}
                       className="text-xs text-[#E6002B] hover:underline"
                     >
                       Login with OTP instead?
@@ -275,13 +320,30 @@ export default function Login() {
                   <div className="relative">
                     <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
                     <input
+                      id="login-password"
+                      name="password"
                       type="password"
+                      autoComplete="current-password"
+                      required
                       placeholder="••••••••"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       className="w-full pl-9 pr-3 py-2 rounded-lg bg-[#0B0E17] border border-white/15 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-[#E6002B] transition-colors"
                     />
                   </div>
+                </div>
+
+                {/* Remember Me Checkbox */}
+                <div className="flex items-center justify-between pt-0.5">
+                  <label className="flex items-center gap-2 cursor-pointer select-none text-xs text-slate-300 hover:text-white">
+                    <input
+                      type="checkbox"
+                      checked={rememberMe}
+                      onChange={(e) => setRememberMe(e.target.checked)}
+                      className="w-4 h-4 rounded bg-[#0B0E17] border-white/20 text-[#E6002B] focus:ring-0 focus:ring-offset-0 cursor-pointer accent-[#E6002B]"
+                    />
+                    <span>Remember my credentials on this device</span>
+                  </label>
                 </div>
 
                 <button
@@ -320,7 +382,8 @@ export default function Login() {
                       />
                     </div>
                     <p className="text-xs text-slate-400 pt-0.5">
-                      We'll send a 6-digit one-time code to authenticate you instantly without a password.
+                      We'll send a 6-digit one-time code to authenticate you
+                      instantly without a password.
                     </p>
                   </div>
 
@@ -351,11 +414,32 @@ export default function Login() {
                     <span>Change email ({otpEmail})</span>
                   </button>
 
+                  {devOtpCode && (
+                    <div className="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-xs text-emerald-300 flex items-center justify-between">
+                      <span>
+                        🔑 Local Test Code:{" "}
+                        <strong className="font-mono text-sm tracking-widest text-white">
+                          {devOtpCode}
+                        </strong>
+                      </span>
+                      <button
+                        type="button"
+                        onClick={handleAutofillDevOtp}
+                        className="px-2.5 py-1 rounded bg-emerald-500 hover:bg-emerald-400 text-black font-bold text-xs cursor-pointer font-gaming uppercase tracking-wider"
+                      >
+                        Autofill Code
+                      </button>
+                    </div>
+                  )}
+
                   <div className="space-y-2">
                     <label className="block text-center text-sm font-semibold text-slate-300">
                       Enter 6-Digit Verification Code
                     </label>
-                    <div className="flex justify-center items-center gap-2" onPaste={handlePasteOtp}>
+                    <div
+                      className="flex justify-center items-center gap-2"
+                      onPaste={handlePasteOtp}
+                    >
                       {otpDigits.map((digit, idx) => (
                         <input
                           key={idx}
@@ -363,7 +447,9 @@ export default function Login() {
                           type="text"
                           maxLength={1}
                           value={digit}
-                          onChange={(e) => handleOtpDigitChange(idx, e.target.value)}
+                          onChange={(e) =>
+                            handleOtpDigitChange(idx, e.target.value)
+                          }
                           onKeyDown={(e) => handleOtpDigitKeyDown(idx, e)}
                           className="w-10 h-11 sm:w-12 sm:h-12 text-center font-mono text-lg font-bold rounded-lg bg-[#0B0E17] border border-white/20 text-white focus:outline-none focus:border-[#E6002B] focus:bg-[#151926] transition-colors"
                         />
@@ -373,7 +459,7 @@ export default function Login() {
 
                   <button
                     type="submit"
-                    disabled={loading || otpDigits.join('').length !== 6}
+                    disabled={loading || otpDigits.join("").length !== 6}
                     className="w-full py-2.5 rounded-lg bg-[#E6002B] hover:bg-[#C90022] text-white font-bold text-sm uppercase tracking-wider transition-colors flex items-center justify-center gap-1.5 cursor-pointer font-gaming disabled:opacity-50"
                   >
                     {loading ? (
@@ -387,9 +473,11 @@ export default function Login() {
                   </button>
 
                   <div className="text-center text-xs text-slate-400">
-                    Didn't receive the code?{' '}
+                    Didn't receive the code?{" "}
                     {resendTimer > 0 ? (
-                      <span className="text-slate-500">Resend in {resendTimer}s</span>
+                      <span className="text-slate-500">
+                        Resend in {resendTimer}s
+                      </span>
                     ) : (
                       <button
                         type="button"
@@ -408,13 +496,15 @@ export default function Login() {
           )}
 
           <div className="text-center pt-2 border-t border-white/10 text-sm text-slate-400">
-            Don't have an account?{' '}
-            <Link to="/register" className="font-bold text-white hover:underline">
+            Don't have an account?{" "}
+            <Link
+              to="/register"
+              className="font-bold text-white hover:underline"
+            >
               Create an account
             </Link>
           </div>
         </div>
-
       </div>
     </div>
   );

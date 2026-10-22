@@ -9,6 +9,24 @@ const generateToken = (id) => {
   return jwt.sign({ id }, jwtSecret, { expiresIn: '30d' });
 };
 
+// Helper to fix common email domain typos (e.g. gmai.com, gamil.com -> gmail.com)
+const normalizeEmail = (rawEmail) => {
+  if (!rawEmail) return '';
+  const clean = rawEmail.toLowerCase().trim();
+  const [local, domain] = clean.split('@');
+  if (!domain) return clean;
+  if (['gmai.com', 'gamil.com', 'gmial.com', 'gmaill.com'].includes(domain)) {
+    return `${local}@gmail.com`;
+  }
+  if (['yaho.com', 'yahooo.com'].includes(domain)) {
+    return `${local}@yahoo.com`;
+  }
+  if (['hotmial.com', 'hotmai.com'].includes(domain)) {
+    return `${local}@hotmail.com`;
+  }
+  return clean;
+};
+
 // Helper to generate a unique clean username for organizers if not supplied
 const generateOrganizerUsername = async (name, email) => {
   const base = (name || email.split('@')[0])
@@ -37,7 +55,7 @@ const sendOtp = async (req, res) => {
       return res.status(400).json({ message: 'Email address is required' });
     }
 
-    const cleanEmail = email.toLowerCase().trim();
+    const cleanEmail = normalizeEmail(email);
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(cleanEmail)) {
       return res.status(400).json({ message: 'Please provide a valid email address' });
@@ -45,7 +63,12 @@ const sendOtp = async (req, res) => {
 
     // Registration flow checks
     if (purpose === 'register') {
-      const existingEmail = await User.findOne({ email: cleanEmail });
+      const existingEmail = await User.findOne({ 
+        $or: [
+          { email: cleanEmail },
+          { email: email.toLowerCase().trim() }
+        ]
+      });
       if (existingEmail) {
         return res.status(400).json({ message: 'An account with this email already exists' });
       }
@@ -71,7 +94,13 @@ const sendOtp = async (req, res) => {
 
     // Login flow checks
     if (purpose === 'login') {
-      const existingUser = await User.findOne({ email: cleanEmail });
+      const existingUser = await User.findOne({ 
+        $or: [
+          { email: cleanEmail },
+          { email: email.toLowerCase().trim() },
+          { username: email.toLowerCase().trim() }
+        ]
+      });
       if (!existingUser) {
         return res.status(404).json({ message: 'No registered account found with this email. Please sign up.' });
       }
@@ -104,7 +133,7 @@ const sendOtp = async (req, res) => {
     });
 
     // Send the email (or console fallback in dev)
-    await sendOtpEmail({
+    const emailResult = await sendOtpEmail({
       email: cleanEmail,
       otp: otpCode,
       purpose
@@ -112,7 +141,8 @@ const sendOtp = async (req, res) => {
 
     res.json({
       success: true,
-      message: `Verification code sent to ${cleanEmail}`
+      message: `Verification code sent to ${cleanEmail}`,
+      devOtp: (emailResult.mode !== 'smtp' || process.env.NODE_ENV !== 'production') ? otpCode : undefined
     });
   } catch (error) {
     console.error('Error in sendOtp:', error);
@@ -131,11 +161,15 @@ const verifyOtpRegister = async (req, res) => {
       return res.status(400).json({ message: 'Email and 6-digit OTP code are required' });
     }
 
-    const cleanEmail = email.toLowerCase().trim();
+    const cleanEmail = normalizeEmail(email);
+    const rawEmail = email.toLowerCase().trim();
     const cleanOtp = otp.toString().trim();
 
     const otpRecord = await Otp.findOne({
-      email: cleanEmail,
+      $or: [
+        { email: cleanEmail },
+        { email: rawEmail }
+      ],
       otp: cleanOtp,
       purpose: 'register'
     });
@@ -152,7 +186,11 @@ const verifyOtpRegister = async (req, res) => {
 
     // Re-verify uniqueness
     const existing = await User.findOne({
-      $or: [{ email: cleanEmail }, { username: username.toLowerCase() }]
+      $or: [
+        { email: cleanEmail },
+        { email: rawEmail },
+        { username: username.toLowerCase() }
+      ]
     });
 
     if (existing) {
@@ -201,11 +239,15 @@ const verifyOtpLogin = async (req, res) => {
       return res.status(400).json({ message: 'Email and 6-digit OTP code are required' });
     }
 
-    const cleanEmail = email.toLowerCase().trim();
+    const cleanEmail = normalizeEmail(email);
+    const rawEmail = email.toLowerCase().trim();
     const cleanOtp = otp.toString().trim();
 
     const otpRecord = await Otp.findOne({
-      email: cleanEmail,
+      $or: [
+        { email: cleanEmail },
+        { email: rawEmail }
+      ],
       otp: cleanOtp,
       purpose: 'login'
     });
@@ -214,7 +256,13 @@ const verifyOtpLogin = async (req, res) => {
       return res.status(400).json({ message: 'Invalid or expired verification code' });
     }
 
-    const user = await User.findOne({ email: cleanEmail });
+    const user = await User.findOne({
+      $or: [
+        { email: cleanEmail },
+        { email: rawEmail },
+        { username: rawEmail }
+      ]
+    });
     if (!user) {
       return res.status(404).json({ message: 'No account found with this email' });
     }
@@ -308,14 +356,18 @@ const loginUser = async (req, res) => {
     }
 
     const cleanInput = email.toLowerCase().trim();
+    const normalizedEmail = cleanInput.includes('@') ? normalizeEmail(cleanInput) : '';
 
-    // Allow login with either email or username
-    const user = await User.findOne({
-      $or: [
-        { email: cleanInput },
-        { username: cleanInput }
-      ]
-    });
+    // Allow login with raw email, normalized email (fixing common domain typos), or username
+    const queryConditions = [
+      { email: cleanInput },
+      { username: cleanInput }
+    ];
+    if (normalizedEmail && normalizedEmail !== cleanInput) {
+      queryConditions.push({ email: normalizedEmail });
+    }
+
+    const user = await User.findOne({ $or: queryConditions });
 
     if (user && (await bcrypt.compare(password, user.password))) {
       res.json({

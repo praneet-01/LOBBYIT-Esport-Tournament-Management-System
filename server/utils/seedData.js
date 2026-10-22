@@ -201,7 +201,30 @@ const seedData = async () => {
       maxTeams: 32,
       prizePool: '₹1,000,000',
       rules: '1. All matches are 5v5 MR12 standard competitive format.\n2. Tactical timeouts allowed once per side.\n3. Anti-cheat software Vanguard must be active.',
-      status: 'published'
+      status: 'published',
+      matches: [
+        {
+          matchNumber: 1,
+          title: 'Match 1 - Ascent Qualifiers',
+          map: 'Ascent',
+          roomId: 'VAL-ROOM-501',
+          password: 'spikeplant99',
+          customNote: 'Server: Mumbai. Custom lobby open for 15 mins. Vanguard anti-cheat required.',
+          status: 'live',
+          scheduledTime: new Date(now.getTime() + 2 * 60 * 60 * 1000),
+          credentialsSharedAt: new Date(now.getTime() - 5 * 60 * 1000)
+        },
+        {
+          matchNumber: 2,
+          title: 'Match 2 - Bind Decider',
+          map: 'Bind',
+          roomId: '',
+          password: '',
+          customNote: 'Map 2 will commence immediately after Match 1 concludes.',
+          status: 'upcoming',
+          scheduledTime: new Date(now.getTime() + 4 * 60 * 60 * 1000)
+        }
+      ]
     });
 
     const tourney2 = await Tournament.create({
@@ -223,7 +246,40 @@ const seedData = async () => {
       maxTeams: 48,
       prizePool: '₹350,000',
       rules: 'Official Free Fire esports league placement points system.',
-      status: 'published'
+      status: 'published',
+      matches: [
+        {
+          matchNumber: 1,
+          title: 'Round 1 - Bermuda Drop',
+          map: 'Bermuda',
+          roomId: 'FF-884210',
+          password: 'survival2026',
+          customNote: 'Drop into custom lobby. Gun skins allowed. Character skill active.',
+          status: 'live',
+          scheduledTime: new Date(now.getTime() + 1 * 60 * 60 * 1000),
+          credentialsSharedAt: new Date(now.getTime() - 2 * 60 * 1000)
+        },
+        {
+          matchNumber: 2,
+          title: 'Round 2 - Purgatory Showdown',
+          map: 'Purgatory',
+          roomId: '',
+          password: '',
+          customNote: 'Credentials will be published as soon as Bermuda round finishes.',
+          status: 'upcoming',
+          scheduledTime: new Date(now.getTime() + 2 * 60 * 60 * 1000)
+        },
+        {
+          matchNumber: 3,
+          title: 'Round 3 - Kalahari Final',
+          map: 'Kalahari',
+          roomId: '',
+          password: '',
+          customNote: 'Grand finale map.',
+          status: 'upcoming',
+          scheduledTime: new Date(now.getTime() + 3 * 60 * 60 * 1000)
+        }
+      ]
     });
 
     const tourney3 = await Tournament.create({
@@ -245,7 +301,40 @@ const seedData = async () => {
       maxTeams: 64,
       prizePool: '₹500,000',
       rules: '1. Erangel, Miramar, and Sanhok maps.\n2. Official points system (10 points per WWCD).',
-      status: 'published'
+      status: 'published',
+      matches: [
+        {
+          matchNumber: 1,
+          title: 'Match 1 - Erangel Tactical Clash',
+          map: 'Erangel',
+          roomId: 'BGMI-749102',
+          password: 'erangelgod77',
+          customNote: 'Assigned Slots: Slot 1-25. 15 minutes entry window before flight path starts.',
+          status: 'live',
+          scheduledTime: new Date(now.getTime() + 30 * 60 * 1000),
+          credentialsSharedAt: new Date(now.getTime() - 1 * 60 * 1000)
+        },
+        {
+          matchNumber: 2,
+          title: 'Match 2 - Miramar Desert Warfare',
+          map: 'Miramar',
+          roomId: '',
+          password: '',
+          customNote: 'Room ID & Password will be shared right after Match 1 ends.',
+          status: 'upcoming',
+          scheduledTime: new Date(now.getTime() + 90 * 60 * 1000)
+        },
+        {
+          matchNumber: 3,
+          title: 'Match 3 - Rondo / Sanhok Decider',
+          map: 'Rondo',
+          roomId: '',
+          password: '',
+          customNote: 'Final championship round.',
+          status: 'upcoming',
+          scheduledTime: new Date(now.getTime() + 150 * 60 * 1000)
+        }
+      ]
     });
 
     const tourney4 = await Tournament.create({

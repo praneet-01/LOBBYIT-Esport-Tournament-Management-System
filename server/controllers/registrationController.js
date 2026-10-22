@@ -48,9 +48,9 @@ const createRegistration = async (req, res) => {
           tag: req.body.teamTag || req.body.teamName.substring(0, 4).toUpperCase(),
           owner: req.user._id,
           captain: {
-            name: req.user.name,
-            inGameName: players[0]?.inGameName || req.user.username,
-            email: req.user.email
+            name: players[0]?.name || req.user.name || 'Captain',
+            inGameName: players[0]?.inGameName || req.user.username || 'Captain',
+            email: players[0]?.email || req.user.email || ''
           },
           players: players
         });
@@ -117,11 +117,79 @@ const createRegistration = async (req, res) => {
 const getMyRegistrations = async (req, res) => {
   try {
     const registrations = await Registration.find({ submittedBy: req.user._id })
-      .populate('tournament', 'title game banner startDate registrationDeadline status slug prizePool tournamentType')
+      .populate('tournament', 'title game banner startDate endDate registrationDeadline status slug prizePool tournamentType matches organizer')
       .populate('team', 'name logo game country captain')
       .sort({ createdAt: -1 });
 
     res.json(registrations);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// @desc    Get all active matches for tournaments current player has registered for (real-time polling support)
+// @route   GET /api/registrations/my-matches
+// @access  Private (Player / Team)
+const getMyRegisteredMatches = async (req, res) => {
+  try {
+    const registrations = await Registration.find({
+      submittedBy: req.user._id,
+      status: { $in: ['accepted', 'pending'] }
+    })
+      .populate({
+        path: 'tournament',
+        populate: { path: 'organizer', select: 'name username avatar email' }
+      })
+      .populate('team', 'name logo game country captain')
+      .sort({ createdAt: -1 });
+
+    const formatted = registrations.map((reg) => {
+      const tourney = reg.tournament;
+      if (!tourney) return null;
+      const isAccepted = reg.status === 'accepted';
+      return {
+        registrationId: reg._id,
+        registrationStatus: reg.status,
+        teamName: reg.teamName || reg.team?.name,
+        teamTag: reg.teamTag || reg.team?.tag,
+        submittedAt: reg.submittedAt,
+        players: reg.players,
+        tournament: {
+          _id: tourney._id,
+          title: tourney.title,
+          slug: tourney.slug,
+          game: tourney.game,
+          banner: tourney.banner,
+          startDate: tourney.startDate,
+          endDate: tourney.endDate,
+          status: tourney.status,
+          prizePool: tourney.prizePool,
+          tournamentType: tourney.tournamentType,
+          platform: tourney.platform,
+          organizer: tourney.organizer,
+          matches: (tourney.matches || []).map((m) => ({
+            _id: m._id,
+            matchNumber: m.matchNumber,
+            title: m.title,
+            map: m.map,
+            roomId: isAccepted ? m.roomId : '',
+            password: isAccepted ? m.password : '',
+            customNote: isAccepted ? m.customNote : '',
+            status: m.status,
+            scheduledTime: m.scheduledTime,
+            credentialsSharedAt: m.credentialsSharedAt,
+            isRoomUnlocked: isAccepted,
+            lockReason: !isAccepted ? (reg.status === 'pending' ? 'Application awaiting organizer approval' : 'Application declined') : ''
+          }))
+        }
+      };
+    }).filter(Boolean);
+
+    res.json({
+      matches: formatted,
+      totalCount: formatted.length,
+      syncedAt: new Date()
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -235,6 +303,7 @@ const rejectRegistration = async (req, res) => {
 module.exports = {
   createRegistration,
   getMyRegistrations,
+  getMyRegisteredMatches,
   getTournamentRegistrations,
   getRegistrationById,
   acceptRegistration,

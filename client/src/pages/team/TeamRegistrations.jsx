@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import api from '../../services/api';
 import Sidebar from '../../components/dashboard/Sidebar';
 import StatusBadge from '../../components/common/StatusBadge';
-import { FileCheck2, Eye, Compass, Trophy } from 'lucide-react';
+import { FileCheck2, Eye, Compass, Trophy, Gamepad2 } from 'lucide-react';
 
 export default function TeamRegistrations() {
   const [registrations, setRegistrations] = useState([]);
@@ -82,12 +82,20 @@ export default function TeamRegistrations() {
                           {new Date(reg.createdAt).toLocaleDateString()}
                         </td>
                         <td className="py-3.5 px-3 text-right">
-                          <Link
-                            to={`/tournaments/${reg.tournament?.slug}`}
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#141824] hover:bg-[#1A2030] text-slate-200 hover:text-white font-bold text-xs border border-white/10 transition-colors"
-                          >
-                            <Eye className="w-3.5 h-3.5" /> View Lobby
-                          </Link>
+                          <div className="flex items-center justify-end gap-2">
+                            <Link
+                              to="/my-matches"
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/15 hover:bg-emerald-500 hover:text-black text-emerald-400 font-bold text-xs border border-emerald-500/30 transition-all font-gaming"
+                            >
+                              <Gamepad2 className="w-3.5 h-3.5" /> Match Rooms
+                            </Link>
+                            <Link
+                              to={`/tournaments/${reg.tournament?.slug}`}
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#141824] hover:bg-[#1A2030] text-slate-200 hover:text-white font-bold text-xs border border-white/10 transition-colors"
+                            >
+                              <Eye className="w-3.5 h-3.5" /> View Lobby
+                            </Link>
+                          </div>
                         </td>
                       </tr>
                     ))}

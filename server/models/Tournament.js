@@ -1,5 +1,21 @@
 const mongoose = require('mongoose');
 
+const matchSchema = new mongoose.Schema({
+  matchNumber: { type: Number, default: 1 },
+  title: { type: String, default: '' },
+  map: { type: String, required: true },
+  roomId: { type: String, default: '' },
+  password: { type: String, default: '' },
+  customNote: { type: String, default: '' },
+  status: { 
+    type: String, 
+    enum: ['upcoming', 'live', 'completed', 'cancelled'], 
+    default: 'upcoming' 
+  },
+  scheduledTime: { type: Date },
+  credentialsSharedAt: { type: Date }
+}, { timestamps: true });
+
 const tournamentSchema = new mongoose.Schema({
   title: { type: String, required: true, trim: true },
   slug: { type: String, required: true, unique: true, lowercase: true, trim: true },
@@ -26,7 +42,8 @@ const tournamentSchema = new mongoose.Schema({
     type: String, 
     enum: ['draft', 'published', 'registration_closed', 'completed'], 
     default: 'draft' 
-  }
+  },
+  matches: [matchSchema]
 }, { timestamps: true });
 
 module.exports = mongoose.model('Tournament', tournamentSchema);

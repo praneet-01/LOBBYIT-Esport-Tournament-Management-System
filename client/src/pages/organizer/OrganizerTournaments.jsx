@@ -3,11 +3,13 @@ import { Link } from 'react-router-dom';
 import api from '../../services/api';
 import Sidebar from '../../components/dashboard/Sidebar';
 import StatusBadge from '../../components/common/StatusBadge';
-import { PlusCircle, Eye, Trash2, Globe, Lock, Shield } from 'lucide-react';
+import MatchRoomManagerModal from '../../components/organizer/MatchRoomManagerModal';
+import { PlusCircle, Eye, Trash2, Globe, Lock, Shield, Gamepad2 } from 'lucide-react';
 
 export default function OrganizerTournaments() {
   const [tournaments, setTournaments] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedTournamentForRooms, setSelectedTournamentForRooms] = useState(null);
 
   const fetchTournaments = async () => {
     try {
@@ -87,11 +89,25 @@ export default function OrganizerTournaments() {
                       <StatusBadge status={t.status} type="tournament" />
                     </div>
 
-                    <div className="p-3 rounded-lg bg-[#0B0E17] border border-white/10 text-xs flex justify-between items-center text-slate-300">
-                      <span>Applications:</span>
-                      <strong className="text-white font-mono font-bold">
-                        {t.registeredTeamsCount || 0} / {t.maxTeams} Teams
-                      </strong>
+                    <div className="grid grid-cols-2 gap-2 text-xs">
+                      <div className="p-3 rounded-lg bg-[#0B0E17] border border-white/10 flex flex-col justify-between text-slate-300">
+                        <span className="text-[10px] uppercase font-bold text-slate-400">Applications</span>
+                        <strong className="text-white font-mono font-bold mt-1">
+                          {t.registeredTeamsCount || 0} / {t.maxTeams} Teams
+                        </strong>
+                      </div>
+
+                      <div className="p-3 rounded-lg bg-[#0B0E17] border border-white/10 flex flex-col justify-between text-slate-300">
+                        <span className="text-[10px] uppercase font-bold text-emerald-400 flex items-center gap-1">
+                          <Gamepad2 className="w-3 h-3" /> Match Rounds
+                        </span>
+                        <button
+                          onClick={() => setSelectedTournamentForRooms(t)}
+                          className="mt-1 text-left font-bold text-emerald-400 hover:text-emerald-300 text-xs flex items-center gap-1 cursor-pointer font-gaming uppercase tracking-wider"
+                        >
+                          Manage Rooms ({t.matches?.length || 0}) ➔
+                        </button>
+                      </div>
                     </div>
 
                     <div className="flex items-center justify-between pt-2 border-t border-white/10 text-xs">
@@ -146,6 +162,17 @@ export default function OrganizerTournaments() {
 
         </div>
       </div>
+
+      {/* Match & Room ID Manager Modal */}
+      {selectedTournamentForRooms && (
+        <MatchRoomManagerModal
+          tournament={selectedTournamentForRooms}
+          onClose={() => setSelectedTournamentForRooms(null)}
+          onUpdated={() => {
+            fetchTournaments();
+          }}
+        />
+      )}
     </div>
   );
 }

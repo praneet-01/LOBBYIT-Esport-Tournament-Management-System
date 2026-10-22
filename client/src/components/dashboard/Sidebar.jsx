@@ -6,6 +6,7 @@ import {
   Trophy, 
   PlusCircle, 
   FileCheck2, 
+  Gamepad2,
   Users, 
   Compass, 
   User, 
@@ -33,6 +34,7 @@ export default function Sidebar({ mode = 'organizer' }) {
     { label: 'Profile', path: '/profile', icon: User },
   ] : [
     { label: 'Overview', path: '/team/dashboard', icon: LayoutDashboard },
+    { label: 'My Matches', path: '/my-matches', icon: Gamepad2 },
     { label: 'Discover Tournaments', path: '/tournaments', icon: Compass },
     { label: 'My Team & Lineup', path: '/team/my-team', icon: Users },
     { label: 'My Applications', path: '/team/registrations', icon: FileCheck2 },

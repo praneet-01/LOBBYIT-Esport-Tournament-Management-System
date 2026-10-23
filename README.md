@@ -1,8 +1,8 @@
-# 🎮 LOBBYIT - Esports Tournament Platform
+# 🎮 KRIDITAM - Esports Tournament Platform
 
 Deploy Link - lobbyit-esport-tournament-managemen.vercel.app
 
-**LOBBYIT** is a full-stack esports tournament discovery and management web application built for gaming communities, tournament organizers, and competitive team squads.
+**KRIDITAM** is a full-stack esports tournament discovery and management web application built for gaming communities, tournament organizers, and competitive team squads.
 
 ---
 

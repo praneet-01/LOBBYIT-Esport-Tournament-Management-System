@@ -142,11 +142,13 @@ const sendOtp = async (req, res) => {
     if (!emailResult.success) {
       if (emailResult.mode === 'unconfigured') {
         return res.status(500).json({
-          message: 'Email service is not configured yet. Please configure EMAIL_USER and EMAIL_PASS in server/.env to send verification codes.'
+          message: 'Email service is not configured yet. Please configure EMAIL_USER and EMAIL_PASS in your server environment to send verification codes.'
         });
       }
       return res.status(500).json({
-        message: `Failed to deliver verification code to ${cleanEmail}. Please check that the email address is valid.`
+        message: emailResult.message 
+          ? `Email delivery failed: ${emailResult.message}` 
+          : `Failed to deliver verification code to ${cleanEmail}. Please verify your email address is correct.`
       });
     }
 

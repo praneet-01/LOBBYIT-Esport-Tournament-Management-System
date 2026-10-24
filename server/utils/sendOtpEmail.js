@@ -33,18 +33,27 @@ const sendOtpEmail = async ({ email, otp, purpose = 'register' }) => {
   }
 
   try {
-    // If custom host is defined, use host/port. Otherwise default to standard Gmail service
-    const transportOptions = smtpHost
-      ? {
-          host: smtpHost,
-          port: smtpPort,
-          secure: smtpPort === 465,
-          auth: { user: smtpUser, pass: smtpPass }
-        }
-      : {
-          service: 'gmail',
-          auth: { user: smtpUser, pass: smtpPass }
-        };
+    // Render and cloud platforms throttle port 587 (STARTTLS).
+    // Use Port 465 (Direct SSL) with fast timeouts so it connects instantly and never hangs the UI.
+    const isCustomPort = Boolean(process.env.SMTP_PORT);
+    const targetPort = isCustomPort ? Number(process.env.SMTP_PORT) : 465;
+    const isSecure = targetPort === 465;
+
+    const transportOptions = {
+      host: smtpHost || 'smtp.gmail.com',
+      port: targetPort,
+      secure: isSecure,
+      auth: {
+        user: smtpUser,
+        pass: smtpPass
+      },
+      connectionTimeout: 8000, // 8s connection timeout so the UI never gets stuck
+      greetingTimeout: 6000,
+      socketTimeout: 10000,
+      tls: {
+        rejectUnauthorized: false
+      }
+    };
 
     const transporter = nodemailer.createTransport(transportOptions);
 

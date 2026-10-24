@@ -203,14 +203,12 @@ export function VoiceProvider({ children }) {
     setError(null);
 
     try {
-      // 1. Acquire Local Microphone with Hardware Filtering
+      // 1. Acquire Local Microphone with Universal Mobile-Safe Constraints
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: {
           echoCancellation: true,
           noiseSuppression: true,
-          autoGainControl: true,
-          channelCount: 1, // Mono for minimum bandwidth
-          sampleRate: 48000
+          autoGainControl: true
         },
         video: false
       });
@@ -222,6 +220,9 @@ export function VoiceProvider({ children }) {
       setIsConnected(true);
 
       const socket = socketRef.current;
+      if (socket && !socket.connected) {
+        socket.connect();
+      }
       if (!socket) return;
 
       // Clean old listeners

@@ -45,6 +45,7 @@ export default function TeamVoiceHub() {
   const [inputRoomCode, setInputRoomCode] = useState(urlRoomId || '');
   const [copied, setCopied] = useState(false);
   const [activeTab, setActiveTab] = useState(urlRoomId ? 'join' : 'create');
+  const [isConnecting, setIsConnecting] = useState(false);
 
   // If URL has a roomId and we are not connected to it yet, prefill room code
   useEffect(() => {
@@ -54,17 +55,30 @@ export default function TeamVoiceHub() {
     }
   }, [urlRoomId, isConnected]);
 
-  const handleCreateRoom = () => {
-    const generatedId = `squad-${Date.now().toString(36).slice(-4)}-${Math.floor(100 + Math.random() * 900)}`;
-    joinRoom(generatedId, inputRoomName || 'Squad Voice');
-    navigate(`/team-voice/${generatedId}`, { replace: true });
+  const handleCreateRoom = async () => {
+    try {
+      setIsConnecting(true);
+      const generatedId = `squad-${Date.now().toString(36).slice(-4)}-${Math.floor(100 + Math.random() * 900)}`;
+      await joinRoom(generatedId, inputRoomName || 'Squad Voice');
+      navigate(`/team-voice/${generatedId}`, { replace: true });
+    } finally {
+      setIsConnecting(false);
+    }
   };
 
-  const handleJoinRoom = () => {
-    if (!inputRoomCode.trim()) return;
-    const cleanId = inputRoomCode.trim();
-    joinRoom(cleanId, `Squad Comms (${cleanId})`);
-    navigate(`/team-voice/${cleanId}`, { replace: true });
+  const handleJoinRoom = async () => {
+    let cleanId = inputRoomCode.trim();
+    if (!cleanId) return;
+    if (cleanId.includes('/team-voice/')) {
+      cleanId = cleanId.split('/team-voice/')[1].split(/[?#]/)[0];
+    }
+    try {
+      setIsConnecting(true);
+      await joinRoom(cleanId, `Squad Comms (${cleanId})`);
+      navigate(`/team-voice/${cleanId}`, { replace: true });
+    } finally {
+      setIsConnecting(false);
+    }
   };
 
   const handleCopyInvite = () => {
@@ -397,11 +411,20 @@ export default function TeamVoiceHub() {
 
                   <button
                     onClick={handleJoinRoom}
-                    disabled={!inputRoomCode.trim()}
+                    disabled={!inputRoomCode.trim() || isConnecting}
                     className="w-full py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 disabled:opacity-40 text-black font-black text-xs uppercase tracking-wider transition-all shadow-lg shadow-emerald-500/20 font-gaming flex items-center justify-center gap-2 cursor-pointer"
                   >
-                    <span>Connect to Call</span>
-                    <ArrowRight className="w-4 h-4" />
+                    {isConnecting ? (
+                      <>
+                        <Radio className="w-4 h-4 animate-spin text-black" />
+                        <span>Connecting to Mic & Call...</span>
+                      </>
+                    ) : (
+                      <>
+                        <span>Connect to Call</span>
+                        <ArrowRight className="w-4 h-4" />
+                      </>
+                    )}
                   </button>
                 </div>
               )}

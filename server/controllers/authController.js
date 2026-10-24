@@ -154,7 +154,8 @@ const sendOtp = async (req, res) => {
 
     res.json({
       success: true,
-      message: `Verification code sent to ${cleanEmail}`
+      message: emailResult.message || `Verification code sent to ${cleanEmail}`,
+      devOtp: emailResult.otp || null
     });
   } catch (error) {
     console.error('Error in sendOtp:', error);

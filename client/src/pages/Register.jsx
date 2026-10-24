@@ -93,6 +93,10 @@ export default function Register() {
         password,
       });
 
+      if (response?.devOtp) {
+        setDevOtpCode(response.devOtp);
+      }
+
       setResendTimer(30);
       setStep("verify");
     } catch (err) {
@@ -417,7 +421,20 @@ export default function Register() {
                 <span>Change registration details</span>
               </button>
 
-
+              {devOtpCode && (
+                <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-xs text-emerald-300 flex items-center justify-between shadow-md">
+                  <div>
+                    <span className="font-bold">Sandbox Code:</span> {devOtpCode}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleAutofillDevOtp}
+                    className="px-2.5 py-1 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 text-[11px] font-bold cursor-pointer transition-colors"
+                  >
+                    Auto-Fill
+                  </button>
+                </div>
+              )}
 
               {/* 6 Digit Inputs */}
               <div className="space-y-2">

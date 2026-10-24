@@ -414,7 +414,22 @@ export default function Login() {
                     <span>Change email ({otpEmail})</span>
                   </button>
 
-
+                  {devOtpCode && (
+                    <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-xs text-emerald-300 flex items-center justify-between shadow-md">
+                      <div>
+                        <span className="font-bold">Sandbox Code:</span> {devOtpCode}
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setOtpDigits(String(devOtpCode).split(""));
+                        }}
+                        className="px-2.5 py-1 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 text-[11px] font-bold cursor-pointer transition-colors"
+                      >
+                        Auto-Fill
+                      </button>
+                    </div>
+                  )}
 
                   <div className="space-y-2">
                     <label className="block text-center text-sm font-semibold text-slate-300">

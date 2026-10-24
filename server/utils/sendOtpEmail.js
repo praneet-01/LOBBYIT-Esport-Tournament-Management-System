@@ -1,7 +1,12 @@
 const nodemailer = require('nodemailer');
 
 const sendOtpEmail = async ({ email, otp, purpose = 'register' }) => {
-  const resendKey = (process.env.RESEND_API_KEY || process.env.RESEND_KEY)?.trim().replace(/^["']|["']$/g, '');
+  const resendKey = (
+    process.env.RESEND_email_API_KEY ||
+    process.env.RESEND_EMAIL_API_KEY ||
+    process.env.RESEND_API_KEY ||
+    process.env.RESEND_KEY
+  )?.trim().replace(/^["']|["']$/g, '');
 
   const smtpUser = (
     process.env.EMAIL_USER ||

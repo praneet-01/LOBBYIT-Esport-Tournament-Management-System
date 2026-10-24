@@ -28,6 +28,7 @@ export function VoiceProvider({ children }) {
   const socketRef = useRef(null);
   const localStreamRef = useRef(null);
   const peerConnectionsRef = useRef(new Map()); // socketId -> RTCPeerConnection
+  const candidateQueuesRef = useRef(new Map()); // socketId -> queued RTCIceCandidateInit[]
   const audioElementsRef = useRef(new Map()); // socketId -> HTMLAudioElement
   const audioContextRef = useRef(null);
   const analyserRef = useRef(null);
@@ -37,10 +38,14 @@ export function VoiceProvider({ children }) {
   useEffect(() => {
     let socketUrl = 'http://localhost:5001';
     const envUrl = import.meta.env.VITE_API_URL;
-    if (envUrl) {
+    if (envUrl && typeof envUrl === 'string' && envUrl.trim()) {
       socketUrl = envUrl.trim().replace(/\/api\/?$/, '');
-    } else if (typeof window !== 'undefined' && window.location.hostname !== 'localhost') {
-      socketUrl = window.location.origin;
+    } else if (typeof window !== 'undefined') {
+      if (window.location.port === '5173') {
+        socketUrl = `${window.location.protocol}//${window.location.hostname}:5001`;
+      } else {
+        socketUrl = window.location.origin;
+      }
     }
 
     const socket = io(socketUrl, {
@@ -53,7 +58,11 @@ export function VoiceProvider({ children }) {
     socketRef.current = socket;
 
     socket.on('connect', () => {
-      console.log('[Voice Socket] Connected to signaling gateway');
+      console.log('[Voice Socket] Connected to signaling gateway at', socketUrl);
+    });
+
+    socket.on('connect_error', (err) => {
+      console.warn('[Voice Socket] Connection error:', err.message);
     });
 
     socket.on('disconnect', () => {
@@ -182,6 +191,12 @@ export function VoiceProvider({ children }) {
       if (isDeafened) {
         audio.muted = true;
       }
+      const playPromise = audio.play();
+      if (playPromise !== undefined) {
+        playPromise.catch((playErr) => {
+          console.warn('[WebRTC Audio Autoplay Warning]:', playErr.message);
+        });
+      }
     };
 
     pc.oniceconnectionstatechange = () => {
@@ -202,6 +217,12 @@ export function VoiceProvider({ children }) {
     }
     setError(null);
 
+    const cleanRoomId = (targetRoomId || '').toString().trim().toLowerCase();
+    if (!cleanRoomId) {
+      setError('Invalid room code. Please provide a valid squad code.');
+      return;
+    }
+
     try {
       // 1. Acquire Local Microphone with Universal Mobile-Safe Constraints
       const stream = await navigator.mediaDevices.getUserMedia({
@@ -215,7 +236,7 @@ export function VoiceProvider({ children }) {
       localStreamRef.current = stream;
       setupVoiceActivityDetection(stream);
 
-      setRoomId(targetRoomId);
+      setRoomId(cleanRoomId);
       setRoomName(targetRoomName);
       setIsConnected(true);
 
@@ -271,6 +292,19 @@ export function VoiceProvider({ children }) {
         createPeerConnection(newPeer.socketId, newPeer.user);
       });
 
+      // Helper to flush queued candidates
+      const flushCandidateQueue = async (socketId, peerConn) => {
+        const queued = candidateQueuesRef.current.get(socketId) || [];
+        for (const cand of queued) {
+          try {
+            await peerConn.addIceCandidate(new RTCIceCandidate(cand));
+          } catch (candErr) {
+            console.warn('[WebRTC Candidate Flush Error]:', candErr);
+          }
+        }
+        candidateQueuesRef.current.delete(socketId);
+      };
+
       // 4. Relay Signals (Offer / Answer / Candidate)
       socket.on('voice:signal', async ({ fromSocketId, signalData, fromUser }) => {
         let pc = peerConnectionsRef.current.get(fromSocketId);
@@ -281,6 +315,8 @@ export function VoiceProvider({ children }) {
         try {
           if (signalData.type === 'offer') {
             await pc.setRemoteDescription(new RTCSessionDescription(signalData.sdp));
+            await flushCandidateQueue(fromSocketId, pc);
+
             const answer = await pc.createAnswer();
             await pc.setLocalDescription(answer);
             socket.emit('voice:signal', {
@@ -295,8 +331,17 @@ export function VoiceProvider({ children }) {
             });
           } else if (signalData.type === 'answer') {
             await pc.setRemoteDescription(new RTCSessionDescription(signalData.sdp));
+            await flushCandidateQueue(fromSocketId, pc);
           } else if (signalData.type === 'candidate' && signalData.candidate) {
-            await pc.addIceCandidate(new RTCIceCandidate(signalData.candidate));
+            if (pc.remoteDescription && pc.remoteDescription.type) {
+              await pc.addIceCandidate(new RTCIceCandidate(signalData.candidate));
+            } else {
+              // Queue candidate until setRemoteDescription completes
+              if (!candidateQueuesRef.current.has(fromSocketId)) {
+                candidateQueuesRef.current.set(fromSocketId, []);
+              }
+              candidateQueuesRef.current.get(fromSocketId).push(signalData.candidate);
+            }
           }
         } catch (sigErr) {
           console.error('[WebRTC Signal Process Error]:', sigErr);
@@ -348,7 +393,7 @@ export function VoiceProvider({ children }) {
 
       // Emit join event to server
       socket.emit('voice:join-room', {
-        roomId: targetRoomId,
+        roomId: cleanRoomId,
         roomName: targetRoomName,
         user: {
           _id: user._id,
@@ -424,6 +469,7 @@ export function VoiceProvider({ children }) {
     // Close all P2P connections
     peerConnectionsRef.current.forEach((pc) => pc.close());
     peerConnectionsRef.current.clear();
+    candidateQueuesRef.current.clear();
 
     // Clean audio elements
     audioElementsRef.current.forEach((audio) => {

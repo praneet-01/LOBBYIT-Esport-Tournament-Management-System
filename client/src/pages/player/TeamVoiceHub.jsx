@@ -50,7 +50,7 @@ export default function TeamVoiceHub() {
   // If URL has a roomId and we are not connected to it yet, prefill room code
   useEffect(() => {
     if (urlRoomId && !isConnected) {
-      setInputRoomCode(urlRoomId);
+      setInputRoomCode(urlRoomId.toLowerCase().trim());
       setActiveTab('join');
     }
   }, [urlRoomId, isConnected]);
@@ -58,24 +58,28 @@ export default function TeamVoiceHub() {
   const handleCreateRoom = async () => {
     try {
       setIsConnecting(true);
-      const generatedId = `squad-${Date.now().toString(36).slice(-4)}-${Math.floor(100 + Math.random() * 900)}`;
+      const generatedId = `squad-${Date.now().toString(36).slice(-4)}-${Math.floor(100 + Math.random() * 900)}`.toLowerCase();
       await joinRoom(generatedId, inputRoomName || 'Squad Voice');
       navigate(`/team-voice/${generatedId}`, { replace: true });
+    } catch (err) {
+      console.error('[Create Room Error]:', err);
     } finally {
       setIsConnecting(false);
     }
   };
 
-  const handleJoinRoom = async () => {
-    let cleanId = inputRoomCode.trim();
+  const handleJoinRoom = async (overrideCode) => {
+    let cleanId = (overrideCode || inputRoomCode).trim().toLowerCase();
     if (!cleanId) return;
     if (cleanId.includes('/team-voice/')) {
-      cleanId = cleanId.split('/team-voice/')[1].split(/[?#]/)[0];
+      cleanId = cleanId.split('/team-voice/')[1].split(/[?#]/)[0].toLowerCase();
     }
     try {
       setIsConnecting(true);
       await joinRoom(cleanId, `Squad Comms (${cleanId})`);
       navigate(`/team-voice/${cleanId}`, { replace: true });
+    } catch (err) {
+      console.error('[Join Room Error]:', err);
     } finally {
       setIsConnecting(false);
     }
@@ -396,6 +400,27 @@ export default function TeamVoiceHub() {
                 </div>
               ) : (
                 <div className="space-y-4">
+                  {urlRoomId && (
+                    <div className="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-between gap-3">
+                      <div>
+                        <div className="text-[11px] font-bold uppercase tracking-wider text-emerald-400">
+                          Squad Call Invite Detected
+                        </div>
+                        <div className="text-xs text-white font-mono mt-0.5">
+                          {urlRoomId}
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => handleJoinRoom(urlRoomId)}
+                        disabled={isConnecting}
+                        className="px-3 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-black text-xs font-black uppercase tracking-wider font-gaming shadow-md flex items-center gap-1 cursor-pointer"
+                      >
+                        <span>Join</span>
+                        <ArrowRight className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  )}
+
                   <div className="space-y-1.5">
                     <label className="block text-xs font-bold uppercase tracking-wider text-slate-300">
                       Enter Room Code or Invite Link
@@ -404,13 +429,22 @@ export default function TeamVoiceHub() {
                       type="text"
                       placeholder="e.g. squad-a91z-824"
                       value={inputRoomCode}
-                      onChange={(e) => setInputRoomCode(e.target.value)}
+                      onChange={(e) => setInputRoomCode(e.target.value.toLowerCase().trim())}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' && inputRoomCode.trim() && !isConnecting) {
+                          handleJoinRoom();
+                        }
+                      }}
+                      autoCapitalize="none"
+                      autoCorrect="off"
+                      spellCheck={false}
+                      autoComplete="off"
                       className="w-full px-3.5 py-2.5 rounded-xl bg-[#090C13] border border-white/15 text-white placeholder-slate-500 text-sm font-mono focus:outline-none focus:border-emerald-500 transition-colors"
                     />
                   </div>
 
                   <button
-                    onClick={handleJoinRoom}
+                    onClick={() => handleJoinRoom()}
                     disabled={!inputRoomCode.trim() || isConnecting}
                     className="w-full py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 disabled:opacity-40 text-black font-black text-xs uppercase tracking-wider transition-all shadow-lg shadow-emerald-500/20 font-gaming flex items-center justify-center gap-2 cursor-pointer"
                   >

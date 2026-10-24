@@ -38,6 +38,14 @@ const OrganizerRoute = ({ children }) => {
   return children;
 };
 
+// Protected Route Wrapper for Authenticated Users (Players, Teams, and Organizers joining comms)
+const AuthenticatedRoute = ({ children }) => {
+  const { user, loading } = useAuth();
+  if (loading) return null;
+  if (!user) return <Navigate to="/login" replace />;
+  return children;
+};
+
 // Protected Route Wrapper for Player / Team
 const TeamRoute = ({ children }) => {
   const { user, loading } = useAuth();
@@ -154,17 +162,17 @@ export default function App() {
           <Route
             path="/team-voice"
             element={
-              <TeamRoute>
+              <AuthenticatedRoute>
                 <TeamVoiceHub />
-              </TeamRoute>
+              </AuthenticatedRoute>
             }
           />
           <Route
             path="/team-voice/:roomId"
             element={
-              <TeamRoute>
+              <AuthenticatedRoute>
                 <TeamVoiceHub />
-              </TeamRoute>
+              </AuthenticatedRoute>
             }
           />
 

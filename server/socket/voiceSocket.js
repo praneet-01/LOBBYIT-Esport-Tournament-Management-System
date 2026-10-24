@@ -14,20 +14,21 @@ function setupVoiceSocket(io) {
     // 1. Join Squad Voice Room
     socket.on('voice:join-room', ({ roomId, roomName = 'Squad Voice', user }) => {
       if (!roomId || !user) return;
+      const cleanRoomId = roomId.toString().trim().toLowerCase();
 
       // Leave any prior voice room first
       const prevRoomId = socketToRoom.get(socket.id);
-      if (prevRoomId && prevRoomId !== roomId) {
+      if (prevRoomId && prevRoomId !== cleanRoomId) {
         leaveCurrentRoom(socket);
       }
 
-      socket.join(roomId);
-      socketToRoom.set(socket.id, roomId);
+      socket.join(cleanRoomId);
+      socketToRoom.set(socket.id, cleanRoomId);
 
-      if (!rooms.has(roomId)) {
-        rooms.set(roomId, new Map());
+      if (!rooms.has(cleanRoomId)) {
+        rooms.set(cleanRoomId, new Map());
       }
-      const roomPeers = rooms.get(roomId);
+      const roomPeers = rooms.get(cleanRoomId);
 
       const peerInfo = {
         socketId: socket.id,
@@ -51,15 +52,15 @@ function setupVoiceSocket(io) {
 
       // Send existing peers to new user (initiates WebRTC offer)
       socket.emit('voice:all-peers', {
-        roomId,
+        roomId: cleanRoomId,
         roomName,
         peers: existingPeers
       });
 
       // Notify existing peers that a new teammate joined
-      socket.to(roomId).emit('voice:peer-joined', peerInfo);
+      socket.to(cleanRoomId).emit('voice:peer-joined', peerInfo);
 
-      console.log(`[Voice] ${user.username} joined room ${roomId} (Total: ${roomPeers.size})`);
+      console.log(`[Voice] ${user.username} joined room ${cleanRoomId} (Total: ${roomPeers.size})`);
     });
 
     // 2. Relay WebRTC Signal (Offer / Answer / ICE Candidate)

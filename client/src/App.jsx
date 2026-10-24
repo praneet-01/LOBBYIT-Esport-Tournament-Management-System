@@ -25,6 +25,8 @@ import TeamDashboard from "./pages/team/TeamDashboard";
 import ManageTeam from "./pages/team/ManageTeam";
 import TeamRegistrations from "./pages/team/TeamRegistrations";
 import MyMatches from "./pages/team/MyMatches";
+import TeamVoiceHub from "./pages/player/TeamVoiceHub";
+import FloatingVoiceDock from "./components/voice/FloatingVoiceDock";
 
 // Protected Route Wrapper for Organizer
 const OrganizerRoute = ({ children }) => {
@@ -149,6 +151,22 @@ export default function App() {
               </TeamRoute>
             }
           />
+          <Route
+            path="/team-voice"
+            element={
+              <TeamRoute>
+                <TeamVoiceHub />
+              </TeamRoute>
+            }
+          />
+          <Route
+            path="/team-voice/:roomId"
+            element={
+              <TeamRoute>
+                <TeamVoiceHub />
+              </TeamRoute>
+            }
+          />
 
           {/* Fallback */}
           <Route path="*" element={<Navigate to="/" replace />} />
@@ -156,6 +174,7 @@ export default function App() {
       </main>
       <Footer />
       <ChatWidget />
+      <FloatingVoiceDock />
     </div>
   );
 }

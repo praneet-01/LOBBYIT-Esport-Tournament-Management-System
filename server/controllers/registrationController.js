@@ -87,6 +87,29 @@ const createRegistration = async (req, res) => {
       return res.status(400).json({ message: 'Your team has already registered for this tournament' });
     }
 
+    // 7. Payment validation for paid tournaments
+    const isPaidTournament = Boolean(tournament.isPaid && tournament.entryFee > 0);
+    const platformFee = tournament.platformFee !== undefined ? tournament.platformFee : 2;
+    const requiredTotal = isPaidTournament ? (Number(tournament.entryFee) + platformFee) : 0;
+
+    let paymentTxnId = req.body.paymentTxnId || '';
+    let paymentMethod = req.body.paymentMethod || (isPaidTournament ? 'UPI' : 'Free');
+    let isPaid = !isPaidTournament;
+    let paymentStatus = isPaidTournament ? 'pending' : 'free';
+
+    if (isPaidTournament) {
+      if (!paymentTxnId) {
+        return res.status(402).json({
+          message: `Payment of ₹${requiredTotal} (Entry: ₹${tournament.entryFee} + Platform Fee: ₹${platformFee}) is required to complete registration.`,
+          requiredAmount: requiredTotal,
+          entryFee: tournament.entryFee,
+          platformFee
+        });
+      }
+      isPaid = true;
+      paymentStatus = 'paid';
+    }
+
     const registration = await Registration.create({
       tournament: tournamentId,
       team: team._id,
@@ -95,15 +118,24 @@ const createRegistration = async (req, res) => {
       submittedBy: req.user._id,
       players,
       status: 'pending',
+      isPaid,
+      paymentStatus,
+      paymentAmount: requiredTotal,
+      platformFee,
+      paymentTxnId,
+      paymentMethod,
+      paidAt: isPaid ? new Date() : undefined,
       submittedAt: new Date()
     });
 
     const populated = await Registration.findById(registration._id)
-      .populate('tournament', 'title game banner startDate prizePool slug')
+      .populate('tournament', 'title game banner startDate prizePool slug isPaid entryFee platformFee')
       .populate('team', 'name logo country captain');
 
     res.status(201).json({
-      message: 'Registration submitted successfully. Status: Pending Organizer Review.',
+      message: isPaidTournament 
+        ? `Payment verified (Txn: ${paymentTxnId})! Registration submitted successfully for organizer approval.`
+        : 'Registration submitted successfully. Status: Pending Organizer Review.',
       registration: populated
     });
   } catch (error) {

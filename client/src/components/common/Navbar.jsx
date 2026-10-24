@@ -12,7 +12,9 @@ import {
   Trophy,
   Gamepad2,
   ChevronDown,
+  Radio,
 } from "lucide-react";
+import NotificationBell from "./NotificationBell";
 
 export default function Navbar() {
   const { user, logout, isOrganizer, isTeam, isPlayer } = useAuth();
@@ -81,22 +83,36 @@ export default function Navbar() {
               Games
             </Link>
 
-            {/* If player/team is logged in, show 'My Matches'. If guest, show 'How It Works' */}
+            {/* If player/team is logged in, show 'My Matches' & 'Squad Voice'. If guest, show 'How It Works' */}
             {user && !isOrganizer ? (
-              <Link
-                to="/my-matches"
-                className={`px-3 py-1.5 rounded-lg text-xs uppercase tracking-wider font-bold transition-all flex items-center gap-1.5 ${
-                  isActive("/my-matches")
-                    ? "text-white bg-[#E6002B] shadow-sm"
-                    : "text-amber-300 hover:text-white hover:bg-white/5"
-                }`}
-              >
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                </span>
-                My Matches
-              </Link>
+              <>
+                <Link
+                  to="/my-matches"
+                  className={`px-3 py-1.5 rounded-lg text-xs uppercase tracking-wider font-bold transition-all flex items-center gap-1.5 ${
+                    isActive("/my-matches")
+                      ? "text-white bg-[#E6002B] shadow-sm"
+                      : "text-amber-300 hover:text-white hover:bg-white/5"
+                  }`}
+                >
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                  </span>
+                  My Matches
+                </Link>
+
+                <Link
+                  to="/team-voice"
+                  className={`px-3 py-1.5 rounded-lg text-xs uppercase tracking-wider font-bold transition-all flex items-center gap-1.5 ${
+                    isActive("/team-voice")
+                      ? "text-white bg-emerald-600 shadow-sm"
+                      : "text-emerald-400 hover:text-white hover:bg-white/5"
+                  }`}
+                >
+                  <Radio className="w-3.5 h-3.5 animate-pulse" />
+                  Squad Voice
+                </Link>
+              </>
             ) : !user ? (
               <a
                 href="/#features"
@@ -138,6 +154,9 @@ export default function Navbar() {
                     <Trophy className="w-3.5 h-3.5" /> Compete
                   </Link>
                 )}
+
+                {/* In-App Push Notification Bell */}
+                <NotificationBell />
 
                 {/* User Dropdown Badge */}
                 <div className="relative">
@@ -263,8 +282,9 @@ export default function Navbar() {
             )}
           </div>
 
-          {/* Mobile Menu Toggle Button */}
-          <div className="md:hidden flex items-center">
+          {/* Mobile Menu Toggle Button & Bell */}
+          <div className="md:hidden flex items-center gap-2">
+            <NotificationBell />
             <button
               onClick={() => setMobileOpen(!mobileOpen)}
               className="p-2 rounded-lg bg-[#141824] text-slate-300 hover:text-white border border-white/10 focus:outline-none"
@@ -305,14 +325,24 @@ export default function Navbar() {
               Games
             </Link>
             {user && !isOrganizer ? (
-              <Link
-                to="/my-matches"
-                onClick={() => setMobileOpen(false)}
-                className={`py-2 px-3 rounded-lg flex items-center gap-2 ${isActive("/my-matches") ? "bg-[#E6002B] text-white" : "text-amber-300"}`}
-              >
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                My Matches
-              </Link>
+              <>
+                <Link
+                  to="/my-matches"
+                  onClick={() => setMobileOpen(false)}
+                  className={`py-2 px-3 rounded-lg flex items-center gap-2 ${isActive("/my-matches") ? "bg-[#E6002B] text-white" : "text-amber-300"}`}
+                >
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                  My Matches
+                </Link>
+                <Link
+                  to="/team-voice"
+                  onClick={() => setMobileOpen(false)}
+                  className={`py-2 px-3 rounded-lg flex items-center gap-2 ${isActive("/team-voice") ? "bg-emerald-600 text-white" : "text-emerald-400"}`}
+                >
+                  <Radio className="w-4 h-4 animate-pulse" />
+                  Squad Voice Comms
+                </Link>
+              </>
             ) : !user ? (
               <a
                 href="/#features"

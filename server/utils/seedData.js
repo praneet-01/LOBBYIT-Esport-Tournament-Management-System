@@ -13,12 +13,12 @@ const seedData = async () => {
       return;
     }
 
-    console.log('[SEED] Seeding LOBBYIT database with authentic game posters and tournament data...');
+    console.log('[SEED] Seeding LOBBYIT database with authentic games & tournament framework...');
 
     const salt = await bcrypt.genSalt(10);
     const defaultPassword = await bcrypt.hash('password123', salt);
 
-    // 1. Create Demo Organizers & Team Users
+    // 1. Create Default Organizer & Player accounts (No fake teams injected)
     const organizer1 = await User.create({
       name: 'Nodwin Esports',
       username: 'nodwin_esports',
@@ -39,28 +39,34 @@ const seedData = async () => {
       bio: 'Pioneering global competitive gaming tournaments.'
     });
 
-    const teamUser1 = await User.create({
-      name: 'Sentinel Squad',
-      username: 'sentinels_captain',
+    const playerUser = await User.create({
+      name: 'Player Captain',
+      username: 'pro_player',
       email: 'team@lobbyit.com',
       password: defaultPassword,
       role: 'Team',
       avatar: 'https://images.unsplash.com/photo-1566492031773-4f4e44671857?auto=format&fit=crop&w=200&q=80',
-      bio: 'Pro tactical shooter team competing in Valorant and CS2.'
+      bio: 'Competitive esports player & team captain.'
     });
 
-    const teamUser2 = await User.create({
-      name: 'GodLike Esports',
-      username: 'godlike_gaming',
-      email: 'godlike@lobbyit.com',
-      password: defaultPassword,
-      role: 'Team',
-      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80',
-      bio: 'Top tier battle royale team.'
-    });
-
-    // 2. Create Games with Official Keyart Posters
-    const games = await Game.insertMany([
+    // 2. Official Games Catalogue
+    await Game.insertMany([
+      {
+        name: 'BGMI',
+        slug: 'bgmi',
+        icon: 'https://static-cdn.jtvnw.net/ttv-boxart/513143-285x380.jpg',
+        banner: 'https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=1200&q=80',
+        description: 'Battlegrounds Mobile India: Premier 16-team lobby battle royale competition.',
+        category: 'Battle Royale'
+      },
+      {
+        name: 'Free Fire',
+        slug: 'free-fire',
+        icon: '/images/free_fire.png',
+        banner: '/images/free_fire.png',
+        description: 'High-octane mobile battle royale survival and 4v4 Clash Squad tournament format.',
+        category: 'Battle Royale'
+      },
       {
         name: 'Valorant',
         slug: 'valorant',
@@ -70,338 +76,136 @@ const seedData = async () => {
         category: 'Tactical FPS'
       },
       {
-        name: 'Free Fire',
-        slug: 'free-fire',
-        icon: '/images/free_fire.png',
-        banner: '/images/free_fire.png',
-        description: 'Fast-paced mobile survival game with 50 players parachuting onto remote islands.',
-        category: 'Battle Royale'
-      },
-      {
-        name: 'BGMI',
-        slug: 'bgmi',
-        icon: 'https://static-cdn.jtvnw.net/ttv-boxart/513143-285x380.jpg',
-        banner: 'https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=1200&q=80',
-        description: 'High-octane mobile battle royale survival shooter featuring 100-player tactical drops.',
-        category: 'Battle Royale'
-      },
-      {
         name: 'CS2',
         slug: 'cs2',
         icon: 'https://static-cdn.jtvnw.net/ttv-boxart/32399_IGDB-285x380.jpg',
         banner: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=1200&q=80',
-        description: 'The legendary competitive tactical shooter upgraded with Source 2 physics & sub-tick updates.',
+        description: 'Source 2 sub-tick competitive shooter with defusal tournaments.',
         category: 'Tactical FPS'
-      },
-      {
-        name: 'Mobile Legends',
-        slug: 'mobile-legends',
-        icon: 'https://static-cdn.jtvnw.net/ttv-boxart/494131-285x380.jpg',
-        banner: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1200&q=80',
-        description: 'Popular 5v5 mobile MOBA showdown featuring instant matchmaking and laning battles.',
-        category: 'Mobile MOBA'
       },
       {
         name: 'eFootball',
         slug: 'efootball',
         icon: '/images/efootball.png',
         banner: '/images/efootball.png',
-        description: 'Competitive football simulator featuring real-world club rosters and custom tournaments.',
+        description: 'Competitive football simulator featuring 1v1 and 2v2 championship tournaments.',
         category: 'Sports Simulator'
       },
       {
-        name: 'League of Legends',
-        slug: 'league-of-legends',
-        icon: 'https://static-cdn.jtvnw.net/ttv-boxart/21779-285x380.jpg',
+        name: 'Mobile Legends',
+        slug: 'mobile-legends',
+        icon: 'https://static-cdn.jtvnw.net/ttv-boxart/494131-285x380.jpg',
         banner: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1200&q=80',
-        description: 'Premier 5v5 MOBA featuring high strategy, champion synergy, and nexus objective control.',
-        category: 'MOBA'
-      },
-      {
-        name: 'Fortnite',
-        slug: 'fortnite',
-        icon: 'https://static-cdn.jtvnw.net/ttv-boxart/33214-285x380.jpg',
-        banner: 'https://images.unsplash.com/photo-1560253023-3ec5d502959f?auto=format&fit=crop&w=1200&q=80',
-        description: 'Dynamic battle royale combined with rapid structural building mechanics.',
-        category: 'Battle Royale'
-      },
-      {
-        name: 'COD',
-        slug: 'cod',
-        icon: 'https://static-cdn.jtvnw.net/ttv-boxart/512710-285x380.jpg',
-        banner: 'https://images.unsplash.com/photo-1579373903781-fd5c0c30c4cd?auto=format&fit=crop&w=1200&q=80',
-        description: 'Fast tactical shooter featuring Call of Duty Warzone & Multiplayer arena modes.',
-        category: 'FPS'
-      },
-      {
-        name: 'Dota 2',
-        slug: 'dota-2',
-        icon: 'https://static-cdn.jtvnw.net/ttv-boxart/29595-285x380.jpg',
-        banner: 'https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=1200&q=80',
-        description: 'Deep strategic action RTS MOBA with unlimited build customization and heroes.',
-        category: 'MOBA'
+        description: 'Popular 5v5 mobile MOBA showdown featuring instant draft and arena matches.',
+        category: 'Mobile MOBA'
       }
     ]);
 
-    // 3. Create Teams
-    const team1 = await Team.create({
-      name: 'Sentinel Prime',
-      logo: 'https://api.dicebear.com/7.x/identicon/svg?seed=SentinelPrime',
-      game: 'Valorant',
-      description: 'Competitive Valorant squad focusing on strategic site execution.',
-      owner: teamUser1._id,
-      captain: 'Alex "Viper" Mercer',
-      country: 'India',
-      players: [
-        { name: 'Alex Mercer', inGameName: 'Viper', email: 'alex@sentinel.gg', country: 'India' },
-        { name: 'Rohan Sharma', inGameName: 'Phoenix', email: 'rohan@sentinel.gg', country: 'India' },
-        { name: 'David Miller', inGameName: 'Sova', email: 'david@sentinel.gg', country: 'United States' },
-        { name: 'Karan Patel', inGameName: 'Omen', email: 'karan@sentinel.gg', country: 'India' },
-        { name: 'Vikram Singh', inGameName: 'Jett', email: 'vikram@sentinel.gg', country: 'India' }
-      ]
-    });
-
-    const team2 = await Team.create({
-      name: 'GodLike Esports',
-      logo: 'https://api.dicebear.com/7.x/identicon/svg?seed=GodLikeEsports',
-      game: 'BGMI',
-      description: 'Dominant Battle Royale quad known for aggressive fragging.',
-      owner: teamUser2._id,
-      captain: 'Jonathan "Jonathan" Amaral',
-      country: 'India',
-      players: [
-        { name: 'Jonathan Amaral', inGameName: 'Jonathan', email: 'jonathan@godlike.in', country: 'India' },
-        { name: 'Abhishek Choudhary', inGameName: 'Zgod', email: 'zgod@godlike.in', country: 'India' },
-        { name: 'Suraj Nityanand', inGameName: 'Neyo', email: 'neyo@godlike.in', country: 'India' },
-        { name: 'Simarjeet Singh', inGameName: 'Psycho', email: 'psycho@godlike.in', country: 'India' }
-      ]
-    });
-
-    // 4. Create Tournaments
+    // 3. Realistic Initial Tournaments (Free & Paid - Clean with ZERO fake demo teams)
     const now = new Date();
     const nextWeek = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
     const inTwoWeeks = new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000);
 
-    const tourney1 = await Tournament.create({
-      title: 'LOBBYIT Valorant Open Masters 2026',
-      slug: 'lobbyit-valorant-open-masters-2026',
-      game: 'Valorant',
-      banner: 'https://static-cdn.jtvnw.net/ttv-boxart/516575-285x380.jpg',
-      logo: 'https://api.dicebear.com/7.x/identicon/svg?seed=ValorantMasters',
-      description: 'The flagship 5v5 open tactical tournament hosted by Nodwin Esports. Compete against top regional teams for glory and cash prizes.',
+    // Tournament 1: BGMI Battle Royale (Paid: ₹100 + ₹2 Platform Fee, 16-teams lobby per group)
+    await Tournament.create({
+      title: 'BGIS 2026: Battlegrounds India Pro Championship',
+      slug: 'bgis-2026-battlegrounds-india-pro',
+      game: 'BGMI',
+      banner: 'https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=1200&q=80',
+      logo: 'https://api.dicebear.com/7.x/identicon/svg?seed=BGIS2026',
+      description: 'Official Multi-round BGIS tournament format. Qualifiers (Group Stage) -> Semifinals -> Grand Finals. 16-Team battle royale lobbies with official 10-point WWCD + kill points system.',
       organizer: organizer1._id,
       tournamentType: 'Online',
-      platform: 'PC',
-      location: 'South Asia Server',
+      tournamentFormat: 'battle_royale',
+      matchType: '4v4',
+      platform: 'Mobile',
+      location: 'Custom Lobby',
       country: 'India',
       startDate: nextWeek,
       endDate: inTwoWeeks,
       registrationDeadline: nextWeek,
-      teamSize: { min: 5, max: 7 },
+      teamSize: { min: 4, max: 6 },
       maxTeams: 32,
-      prizePool: '₹1,000,000',
-      rules: '1. All matches are 5v5 MR12 standard competitive format.\n2. Tactical timeouts allowed once per side.\n3. Anti-cheat software Vanguard must be active.',
+      prizePool: '₹2,00,000',
+      isPaid: true,
+      entryFee: 100,
+      platformFee: 2,
+      rules: '1. Official BGIS 10-point scoring rule.\n2. 16 teams per lobby.\n3. Room ID & Password shared 15 mins prior.\n4. Screenshot proof required for all matches.',
       status: 'published',
-      matches: [
-        {
-          matchNumber: 1,
-          title: 'Match 1 - Ascent Qualifiers',
-          map: 'Ascent',
-          roomId: 'VAL-ROOM-501',
-          password: 'spikeplant99',
-          customNote: 'Server: Mumbai. Custom lobby open for 15 mins. Vanguard anti-cheat required.',
-          status: 'live',
-          scheduledTime: new Date(now.getTime() + 2 * 60 * 60 * 1000),
-          credentialsSharedAt: new Date(now.getTime() - 5 * 60 * 1000)
-        },
-        {
-          matchNumber: 2,
-          title: 'Match 2 - Bind Decider',
-          map: 'Bind',
-          roomId: '',
-          password: '',
-          customNote: 'Map 2 will commence immediately after Match 1 concludes.',
-          status: 'upcoming',
-          scheduledTime: new Date(now.getTime() + 4 * 60 * 60 * 1000)
-        }
-      ]
+      brConfig: {
+        format: 'Battle Royale',
+        stagesCount: 2,
+        matchesPerGroup: 3,
+        qualifyCountPerGroup: 8,
+        pointsSystem: 'BGIS-10'
+      }
     });
 
-    const tourney2 = await Tournament.create({
-      title: 'Free Fire Survival Championship',
-      slug: 'free-fire-survival-championship',
+    // Tournament 2: Free Fire Squad Cup (Free Entry, 16 Teams BR)
+    await Tournament.create({
+      title: 'Free Fire All-Stars Championship',
+      slug: 'free-fire-all-stars-championship',
       game: 'Free Fire',
       banner: '/images/free_fire.png',
-      logo: 'https://api.dicebear.com/7.x/identicon/svg?seed=FreeFireShowdown',
-      description: 'High-energy mobile battle royale survival cup with 50-player squad parachutes.',
+      logo: 'https://api.dicebear.com/7.x/identicon/svg?seed=FFAllStars',
+      description: 'Free to enter championship open to all registered mobile squads. 12-16 team lobbies across Bermuda, Purgatory & Kalahari.',
       organizer: organizer2._id,
       tournamentType: 'Online',
+      tournamentFormat: 'battle_royale',
+      matchType: '4v4',
       platform: 'Mobile',
-      location: 'Custom Room',
-      country: 'India',
-      startDate: nextWeek,
-      endDate: inTwoWeeks,
-      registrationDeadline: nextWeek,
-      teamSize: { min: 4, max: 4 },
-      maxTeams: 48,
-      prizePool: '₹350,000',
-      rules: 'Official Free Fire esports league placement points system.',
-      status: 'published',
-      matches: [
-        {
-          matchNumber: 1,
-          title: 'Round 1 - Bermuda Drop',
-          map: 'Bermuda',
-          roomId: 'FF-884210',
-          password: 'survival2026',
-          customNote: 'Drop into custom lobby. Gun skins allowed. Character skill active.',
-          status: 'live',
-          scheduledTime: new Date(now.getTime() + 1 * 60 * 60 * 1000),
-          credentialsSharedAt: new Date(now.getTime() - 2 * 60 * 1000)
-        },
-        {
-          matchNumber: 2,
-          title: 'Round 2 - Purgatory Showdown',
-          map: 'Purgatory',
-          roomId: '',
-          password: '',
-          customNote: 'Credentials will be published as soon as Bermuda round finishes.',
-          status: 'upcoming',
-          scheduledTime: new Date(now.getTime() + 2 * 60 * 60 * 1000)
-        },
-        {
-          matchNumber: 3,
-          title: 'Round 3 - Kalahari Final',
-          map: 'Kalahari',
-          roomId: '',
-          password: '',
-          customNote: 'Grand finale map.',
-          status: 'upcoming',
-          scheduledTime: new Date(now.getTime() + 3 * 60 * 60 * 1000)
-        }
-      ]
-    });
-
-    const tourney3 = await Tournament.create({
-      title: 'India Campus BGMI Cup',
-      slug: 'india-campus-bgmi-cup',
-      game: 'BGMI',
-      banner: 'https://static-cdn.jtvnw.net/ttv-boxart/513143-285x380.jpg',
-      logo: 'https://api.dicebear.com/7.x/identicon/svg?seed=CampusBGMICup',
-      description: 'National collegiate esports tournament open to registered student squads across India.',
-      organizer: organizer1._id,
-      tournamentType: 'Online',
-      platform: 'Mobile',
-      location: 'Custom Rooms',
+      location: 'Online Server',
       country: 'India',
       startDate: nextWeek,
       endDate: inTwoWeeks,
       registrationDeadline: nextWeek,
       teamSize: { min: 4, max: 5 },
-      maxTeams: 64,
-      prizePool: '₹500,000',
-      rules: '1. Erangel, Miramar, and Sanhok maps.\n2. Official points system (10 points per WWCD).',
+      maxTeams: 32,
+      prizePool: '₹50,000',
+      isPaid: false,
+      entryFee: 0,
+      platformFee: 2,
+      rules: 'Standard Free Fire competitive league guidelines. No character skill restrictions.',
       status: 'published',
-      matches: [
-        {
-          matchNumber: 1,
-          title: 'Match 1 - Erangel Tactical Clash',
-          map: 'Erangel',
-          roomId: 'BGMI-749102',
-          password: 'erangelgod77',
-          customNote: 'Assigned Slots: Slot 1-25. 15 minutes entry window before flight path starts.',
-          status: 'live',
-          scheduledTime: new Date(now.getTime() + 30 * 60 * 1000),
-          credentialsSharedAt: new Date(now.getTime() - 1 * 60 * 1000)
-        },
-        {
-          matchNumber: 2,
-          title: 'Match 2 - Miramar Desert Warfare',
-          map: 'Miramar',
-          roomId: '',
-          password: '',
-          customNote: 'Room ID & Password will be shared right after Match 1 ends.',
-          status: 'upcoming',
-          scheduledTime: new Date(now.getTime() + 90 * 60 * 1000)
-        },
-        {
-          matchNumber: 3,
-          title: 'Match 3 - Rondo / Sanhok Decider',
-          map: 'Rondo',
-          roomId: '',
-          password: '',
-          customNote: 'Final championship round.',
-          status: 'upcoming',
-          scheduledTime: new Date(now.getTime() + 150 * 60 * 1000)
-        }
-      ]
+      brConfig: {
+        format: 'Battle Royale',
+        stagesCount: 2,
+        matchesPerGroup: 2,
+        qualifyCountPerGroup: 8,
+        pointsSystem: 'BGIS-10'
+      }
     });
 
-    const tourney4 = await Tournament.create({
-      title: 'eFootball Kickoff Masters',
-      slug: 'efootball-kickoff-masters',
-      game: 'eFootball',
-      banner: '/images/efootball.png',
-      logo: 'https://api.dicebear.com/7.x/identicon/svg?seed=eFootballCup',
-      description: '1v1 & 2v2 football simulation tournament featuring real-world club rosters.',
-      organizer: organizer2._id,
-      tournamentType: 'Online',
-      platform: 'Crossplay',
-      location: 'Online Server',
-      country: 'Global',
-      startDate: nextWeek,
-      endDate: inTwoWeeks,
-      registrationDeadline: nextWeek,
-      teamSize: { min: 1, max: 2 },
-      maxTeams: 64,
-      prizePool: '₹200,000',
-      rules: '10-minute halves, extra time & penalties active.',
-      status: 'published'
-    });
-
-    const tourney5 = await Tournament.create({
-      title: 'Mobile Legends Bang Bang Arena',
-      slug: 'mobile-legends-bang-bang-arena',
-      game: 'Mobile Legends',
-      banner: 'https://static-cdn.jtvnw.net/ttv-boxart/494131-285x380.jpg',
-      logo: 'https://api.dicebear.com/7.x/identicon/svg?seed=MLBBShowdown',
-      description: 'Fast 5v5 mobile MOBA showdown featuring instant drafting and lane battles.',
+    // Tournament 3: BGMI WOW 4v4 Clash Showdown (Paid: ₹50 + ₹2 Platform fee, 4v4 TDM/WOW)
+    await Tournament.create({
+      title: 'BGMI WOW 4v4 Masters League',
+      slug: 'bgmi-wow-4v4-masters-league',
+      game: 'BGMI',
+      banner: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1200&q=80',
+      logo: 'https://api.dicebear.com/7.x/identicon/svg?seed=BGMIWOW4v4',
+      description: 'Head-to-head 4v4 tactical arena battle in BGMI World of Wonder custom maps. Single elimination bracket with Best-of-3 series.',
       organizer: organizer1._id,
       tournamentType: 'Online',
+      tournamentFormat: 'knockout_bracket',
+      matchType: '4v4',
+      seriesLength: 3,
       platform: 'Mobile',
       location: 'Custom Room',
-      country: 'Global',
+      country: 'India',
       startDate: nextWeek,
       endDate: inTwoWeeks,
       registrationDeadline: nextWeek,
-      teamSize: { min: 5, max: 6 },
-      maxTeams: 32,
-      prizePool: '₹250,000',
-      rules: 'Standard MLBB tournament ban/pick rules.',
+      teamSize: { min: 4, max: 5 },
+      maxTeams: 16,
+      prizePool: '₹25,000',
+      isPaid: true,
+      entryFee: 50,
+      platformFee: 2,
+      rules: 'Best of 3 matches. First team to 40 kills in TDM / WOW arena claims the round.',
       status: 'published'
     });
 
-    // 5. Create Sample Registrations
-    await Registration.create({
-      tournament: tourney1._id,
-      team: team1._id,
-      submittedBy: teamUser1._id,
-      players: team1.players,
-      status: 'accepted',
-      submittedAt: new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000),
-      reviewedAt: new Date()
-    });
-
-    await Registration.create({
-      tournament: tourney3._id,
-      team: team2._id,
-      submittedBy: teamUser2._id,
-      players: team2.players,
-      status: 'pending',
-      submittedAt: new Date()
-    });
-
-    console.log('[SEED] Successfully seeded authentic game posters!');
+    console.log('[SEED] Clean initialization complete! No fake demo teams seeded.');
   } catch (error) {
     console.error('[SEED ERROR]', error.message);
   }

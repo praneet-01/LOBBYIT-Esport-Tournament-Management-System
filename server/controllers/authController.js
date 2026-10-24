@@ -132,17 +132,27 @@ const sendOtp = async (req, res) => {
       } : null
     });
 
-    // Send the email (or console fallback in dev)
+    // Send the email to the user's real inbox
     const emailResult = await sendOtpEmail({
       email: cleanEmail,
       otp: otpCode,
       purpose
     });
 
+    if (!emailResult.success) {
+      if (emailResult.mode === 'unconfigured') {
+        return res.status(500).json({
+          message: 'Email service is not configured yet. Please configure EMAIL_USER and EMAIL_PASS in server/.env to send verification codes.'
+        });
+      }
+      return res.status(500).json({
+        message: `Failed to deliver verification code to ${cleanEmail}. Please check that the email address is valid.`
+      });
+    }
+
     res.json({
       success: true,
-      message: `Verification code sent to ${cleanEmail}`,
-      devOtp: (emailResult.mode !== 'smtp' || process.env.NODE_ENV !== 'production') ? otpCode : undefined
+      message: `Verification code sent to ${cleanEmail}`
     });
   } catch (error) {
     console.error('Error in sendOtp:', error);

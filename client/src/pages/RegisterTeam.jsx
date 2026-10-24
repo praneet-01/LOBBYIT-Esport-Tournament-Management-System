@@ -12,8 +12,10 @@ import {
   Plus, 
   Trash2,
   ArrowRight,
-  UserCheck
+  UserCheck,
+  CreditCard
 } from 'lucide-react';
+import PaymentCheckoutModal from '../components/common/PaymentCheckoutModal';
 
 export default function RegisterTeam() {
   const { slug } = useParams();
@@ -25,6 +27,7 @@ export default function RegisterTeam() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
 
   // Team Details & Lineup State
   const [teamName, setTeamName] = useState('');
@@ -141,16 +144,42 @@ export default function RegisterTeam() {
       }
     }
 
+    // If paid tournament, require payment checkout first
+    const isPaid = Boolean(tournament?.isPaid && tournament?.entryFee > 0);
+    if (isPaid) {
+      setShowPaymentModal(true);
+      return;
+    }
+
+    // Direct registration for free tournament
+    await executeFinalRegistration();
+  };
+
+  const executeFinalRegistration = async (paymentData = null) => {
     setSubmitting(true);
+    setError('');
     try {
-      await api.post('/registrations', {
+      const payload = {
         tournamentId: tournament._id,
         teamName: teamName.trim(),
         teamTag: teamTag.trim() || teamName.substring(0, 4).toUpperCase(),
         players: players
-      });
+      };
 
-      setSuccess('Team registration submitted successfully! Status: Pending Organizer Review.');
+      if (paymentData) {
+        payload.paymentTxnId = paymentData.txnId;
+        payload.paymentMethod = paymentData.paymentMethod;
+        payload.paymentAmount = paymentData.amount;
+      }
+
+      await api.post('/registrations', payload);
+
+      setShowPaymentModal(false);
+      setSuccess(
+        paymentData 
+          ? `Payment verified (Txn: ${paymentData.txnId})! Team registration submitted successfully.` 
+          : 'Team registration submitted successfully! Status: Pending Organizer Review.'
+      );
       setTimeout(() => {
         navigate('/tournaments');
       }, 2000);
@@ -159,6 +188,10 @@ export default function RegisterTeam() {
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const handlePaymentSuccess = async (paymentData) => {
+    await executeFinalRegistration(paymentData);
   };
 
   if (loading) {
@@ -258,9 +291,20 @@ export default function RegisterTeam() {
           className="w-16 h-16 rounded-lg object-cover border border-white/10"
         />
         <div className="space-y-1">
-          <span className="text-[10px] font-bold text-cyan-400 uppercase tracking-wider font-gaming">
-            {tournament?.game} • {tournament?.tournamentType}
-          </span>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-[10px] font-bold text-zinc-300 uppercase tracking-wider font-gaming">
+              {tournament?.game} • {tournament?.tournamentType}
+            </span>
+            {tournament?.isPaid && tournament?.entryFee > 0 ? (
+              <span className="text-[10px] font-bold text-[#FF6B85] bg-[#E6002B]/15 border border-[#E6002B]/30 px-2 py-0.5 rounded font-gaming">
+                Paid: ₹{tournament.entryFee} Entry + ₹{tournament.platformFee || 2} Platform Fee (Total: ₹{tournament.entryFee + (tournament.platformFee || 2)})
+              </span>
+            ) : (
+              <span className="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-2 py-0.5 rounded font-gaming">
+                Free Registration (₹0)
+              </span>
+            )}
+          </div>
           <h3 className="text-base sm:text-lg font-black text-white font-gaming">{tournament?.title}</h3>
           <p className="text-xs text-slate-400">
             Roster Requirements: <strong className="text-white">{minRequired} - {maxRequired} Players</strong> (including In-Game Leader)
@@ -419,10 +463,15 @@ export default function RegisterTeam() {
           <button
             type="submit"
             disabled={submitting}
-            className="w-full sm:w-auto px-8 py-3 rounded-lg bg-[#E6002B] hover:bg-[#C90022] text-white font-bold text-xs uppercase tracking-wider transition-colors flex items-center justify-center gap-2 font-gaming disabled:opacity-50 cursor-pointer"
+            className="w-full sm:w-auto px-8 py-3 rounded-lg bg-[#E6002B] hover:bg-[#C90022] text-white font-bold text-xs uppercase tracking-wider transition-colors flex items-center justify-center gap-2 font-gaming disabled:opacity-50 cursor-pointer shadow-lg"
           >
             {submitting ? (
               <span>Submitting Lineup...</span>
+            ) : tournament?.isPaid && tournament?.entryFee > 0 ? (
+              <>
+                <span>Pay ₹{(Number(tournament.entryFee) || 0) + 2} & Register</span>
+                <CreditCard className="w-4 h-4" />
+              </>
             ) : (
               <>
                 <span>Submit Team Registration</span>
@@ -433,6 +482,16 @@ export default function RegisterTeam() {
         </div>
 
       </form>
+
+      {/* Free Test Payment Gateway Modal */}
+      <PaymentCheckoutModal
+        tournament={tournament}
+        teamName={teamName}
+        user={user}
+        isOpen={showPaymentModal}
+        onClose={() => setShowPaymentModal(false)}
+        onPaymentSuccess={handlePaymentSuccess}
+      />
 
     </div>
   );

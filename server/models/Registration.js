@@ -18,6 +18,17 @@ const registrationSchema = new mongoose.Schema({
     enum: ['pending', 'accepted', 'rejected'], 
     default: 'pending' 
   },
+  isPaid: { type: Boolean, default: false },
+  paymentStatus: {
+    type: String,
+    enum: ['free', 'pending', 'paid', 'failed'],
+    default: 'free'
+  },
+  paymentAmount: { type: Number, default: 0 },
+  platformFee: { type: Number, default: 2 },
+  paymentTxnId: { type: String, default: '' },
+  paymentMethod: { type: String, default: 'UPI' },
+  paidAt: { type: Date },
   submittedAt: { type: Date, default: Date.now },
   organizerMessage: { type: String, default: '' },
   reviewedAt: { type: Date }

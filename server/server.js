@@ -5,8 +5,10 @@ const connectDB = require("./config/db");
 const seedData = require("./utils/seedData");
 const { errorHandler } = require("./middleware/error");
 
-// Load environment variables
-dotenv.config();
+const path = require("path");
+
+// Load environment variables reliably from server/.env
+dotenv.config({ path: path.join(__dirname, ".env") });
 
 const app = express();
 
@@ -59,6 +61,8 @@ app.use("/api/tournaments", require("./routes/tournamentRoutes"));
 app.use("/api/teams", require("./routes/teamRoutes"));
 app.use("/api/registrations", require("./routes/registrationRoutes"));
 app.use("/api/games", require("./routes/gameRoutes"));
+app.use("/api/payments", require("./routes/paymentRoutes"));
+app.use("/api/notifications", require("./routes/notificationRoutes"));
 
 // Kriti Assistant routes
 const assistantRoutes = require("./routes/assistantRoutes");
@@ -77,7 +81,22 @@ app.use("/api/assistant", assistantRoutes);
 // Error handling middleware
 app.use(errorHandler);
 
+const http = require("http");
+const { Server } = require("socket.io");
+const setupVoiceSocket = require("./socket/voiceSocket");
+
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE"]
+  }
+});
+
+// Initialize Team Voice Signaling Gateway
+setupVoiceSocket(io);
+
 const PORT = process.env.PORT || 5001;
-app.listen(PORT, () => {
-  console.log(`[LOBBYIT SERVER] API running on http://localhost:${PORT}`);
+server.listen(PORT, () => {
+  console.log(`[LOBBYIT SERVER] API & Voice Gateway running on http://localhost:${PORT}`);
 });

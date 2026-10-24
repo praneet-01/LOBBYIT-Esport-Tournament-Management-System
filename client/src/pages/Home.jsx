@@ -119,15 +119,15 @@ export default function Home() {
          ======================================================== */}
       <section className="relative min-h-[92vh] sm:min-h-[96vh] lg:min-h-[98vh] flex flex-col justify-end overflow-hidden border-b border-white/10 bg-black">
         
-        {/* GIANT BACKGROUND TEXT "BATTLE" (With 'T' half-visible on both sides of character) */}
+        {/* GIANT BACKGROUND TEXT "BATTLE" */}
         <div className="absolute inset-x-0 top-[12%] sm:top-[14%] md:top-[16%] flex items-center justify-between px-2 sm:px-6 md:px-10 max-w-full select-none pointer-events-none z-0">
-          {/* Left: BAT with T half-visible peeking behind left side of head/hair */}
-          <span className="text-[18vw] sm:text-[19vw] md:text-[20vw] font-black tracking-[0.02em] sm:tracking-[0.04em] text-white font-gaming uppercase whitespace-nowrap leading-none drop-shadow-[0_4px_35px_rgba(255,255,255,0.25)] translate-x-[5vw] sm:translate-x-[7vw] md:translate-x-[8vw]">
+          {/* Left: BAT */}
+          <span className="text-[18vw] sm:text-[19vw] md:text-[20vw] font-black tracking-[0.02em] sm:tracking-[0.04em] text-white/5 font-gaming uppercase whitespace-nowrap leading-none translate-x-[5vw] sm:translate-x-[7vw] md:translate-x-[8vw]">
             BAT
           </span>
 
-          {/* Right: TLE with T half-visible peeking behind right side of head/hair */}
-          <span className="text-[18vw] sm:text-[19vw] md:text-[20vw] font-black tracking-[0.02em] sm:tracking-[0.04em] text-white font-gaming uppercase whitespace-nowrap leading-none drop-shadow-[0_4px_35px_rgba(255,255,255,0.25)] -translate-x-[5vw] sm:-translate-x-[7vw] md:-translate-x-[8vw]">
+          {/* Right: TLE */}
+          <span className="text-[18vw] sm:text-[19vw] md:text-[20vw] font-black tracking-[0.02em] sm:tracking-[0.04em] text-white/5 font-gaming uppercase whitespace-nowrap leading-none -translate-x-[5vw] sm:-translate-x-[7vw] md:-translate-x-[8vw]">
             TLE
           </span>
         </div>

@@ -43,14 +43,25 @@ export default function TournamentCard({ tournament }) {
         
         {/* Top Badges */}
         <div className="absolute top-3 left-3 right-3 flex items-center justify-between z-10">
-          <span className="px-2.5 py-1 rounded-lg bg-black/70 backdrop-blur-md text-xs font-extrabold text-cyber-cyan border border-cyber-cyan/30 uppercase tracking-wider font-gaming">
-            {game}
-          </span>
+          <div className="flex items-center gap-1.5">
+            <span className="px-2.5 py-1 rounded-md bg-black/80 text-xs font-bold text-white border border-white/10 uppercase tracking-wider font-gaming">
+              {game}
+            </span>
+            {tournament.isPaid && tournament.entryFee > 0 ? (
+              <span className="px-2 py-1 rounded-md bg-[#E6002B] text-xs font-bold text-white uppercase tracking-wider font-gaming">
+                ₹{tournament.entryFee} Entry
+              </span>
+            ) : (
+              <span className="px-2 py-1 rounded-md bg-emerald-600/90 text-xs font-bold text-white uppercase tracking-wider font-gaming">
+                Free
+              </span>
+            )}
+          </div>
           <StatusBadge status={status} type="tournament" />
         </div>
 
         {/* Prize Pool Floating Badge */}
-        <div className="absolute bottom-3 right-3 px-3 py-1 rounded-lg bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-black text-sm shadow-lg flex items-center gap-1.5 font-gaming">
+        <div className="absolute bottom-3 right-3 px-3 py-1 rounded-md bg-amber-500 text-slate-950 font-black text-sm shadow flex items-center gap-1.5 font-gaming">
           <Trophy className="w-3.5 h-3.5 text-slate-950" />
           <span>{prizePool}</span>
         </div>

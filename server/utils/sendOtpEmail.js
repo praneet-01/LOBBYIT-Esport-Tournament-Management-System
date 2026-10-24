@@ -1,35 +1,52 @@
 const nodemailer = require('nodemailer');
 
 const sendOtpEmail = async ({ email, otp, purpose = 'register' }) => {
-  console.log(`\n==============================================`);
-  console.log(`🔑 [LOBBYIT OTP DISPATCH]`);
-  console.log(`📧 Target Email: ${email}`);
-  console.log(`⚡ Purpose: ${purpose.toUpperCase()}`);
-  console.log(`🔐 Verification Code: ${otp}`);
-  console.log(`⏰ Valid for: 10 minutes`);
-  console.log(`==============================================\n`);
+  const smtpUser = (
+    process.env.EMAIL_USER ||
+    process.env.SMTP_USER ||
+    process.env.EMAIL_USERNAME ||
+    process.env.GMAIL_USER ||
+    process.env.MAIL_USER ||
+    process.env.EMAIL
+  )?.trim().replace(/^["']|["']$/g, '');
 
-  // Check if SMTP credentials exist in environment
-  const smtpUser = process.env.EMAIL_USER || process.env.SMTP_USER;
-  const smtpPass = process.env.EMAIL_PASS || process.env.SMTP_PASS;
-  const smtpHost = process.env.SMTP_HOST || 'smtp.gmail.com';
-  const smtpPort = process.env.SMTP_PORT || 587;
+  const smtpPass = (
+    process.env.EMAIL_PASS ||
+    process.env.SMTP_PASS ||
+    process.env.EMAIL_PASSWORD ||
+    process.env.GMAIL_PASS ||
+    process.env.GMAIL_PASSWORD ||
+    process.env.MAIL_PASS ||
+    process.env.MAIL_PASSWORD
+  )?.trim().replace(/^["']|["']$/g, '');
+
+  const smtpHost = process.env.SMTP_HOST?.trim().replace(/^["']|["']$/g, '');
+  const smtpPort = process.env.SMTP_PORT ? Number(process.env.SMTP_PORT) : 587;
 
   if (!smtpUser || !smtpPass) {
-    // Development mode fallback: console logged above
-    return { success: true, mode: 'console', otp };
+    console.error('❌ [EMAIL ERROR]: EMAIL_USER or EMAIL_PASS is missing in server/.env. Real email cannot be sent.');
+    return {
+      success: false,
+      mode: 'unconfigured',
+      message: 'SMTP credentials missing. Please set EMAIL_USER and EMAIL_PASS in server/.env.'
+    };
   }
 
   try {
-    const transporter = nodemailer.createTransport({
-      host: smtpHost,
-      port: smtpPort,
-      secure: smtpPort == 465,
-      auth: {
-        user: smtpUser,
-        pass: smtpPass
-      }
-    });
+    // If custom host is defined, use host/port. Otherwise default to standard Gmail service
+    const transportOptions = smtpHost
+      ? {
+          host: smtpHost,
+          port: smtpPort,
+          secure: smtpPort === 465,
+          auth: { user: smtpUser, pass: smtpPass }
+        }
+      : {
+          service: 'gmail',
+          auth: { user: smtpUser, pass: smtpPass }
+        };
+
+    const transporter = nodemailer.createTransport(transportOptions);
 
     const htmlContent = `
       <div style="background-color: #08090D; color: #F1F5F9; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 40px 20px; text-align: center;">
@@ -38,7 +55,7 @@ const sendOtpEmail = async ({ email, otp, purpose = 'register' }) => {
             LOBBY<span style="color: #E6002B;">IT</span>
           </h1>
           <p style="color: #00D8FF; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; margin-top: 0;">
-            Verification Code
+            ${purpose === 'login' ? 'Login Verification Code' : 'Email Verification Code'}
           </p>
           <div style="margin: 28px 0; padding: 20px; background-color: #07080D; border: 1px solid rgba(230,0,43,0.3); border-radius: 12px;">
             <span style="font-size: 38px; font-weight: 900; letter-spacing: 8px; color: #E6002B; font-family: monospace;">
@@ -46,7 +63,7 @@ const sendOtpEmail = async ({ email, otp, purpose = 'register' }) => {
             </span>
           </div>
           <p style="color: #94A3B8; font-size: 13px; line-height: 1.6; margin: 16px 0;">
-            Enter this 6-digit code to verify your identity on LOBBYIT. This code is active for <strong>10 minutes</strong>.
+            Enter this 6-digit verification code to verify your identity on LOBBYIT. This code is active for <strong>10 minutes</strong>.
           </p>
           <p style="color: #64748B; font-size: 11px; margin-top: 24px; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 16px;">
             If you did not request this verification, you can safely ignore this email.
@@ -55,18 +72,18 @@ const sendOtpEmail = async ({ email, otp, purpose = 'register' }) => {
       </div>
     `;
 
-    await transporter.sendMail({
+    const info = await transporter.sendMail({
       from: `"LOBBYIT Esports" <${smtpUser}>`,
       to: email,
-      subject: `Your LOBBYIT Verification Code: ${otp}`,
+      subject: `[LOBBYIT] Your Verification Code is ${otp}`,
       html: htmlContent
     });
 
-    return { success: true, mode: 'smtp', otp };
+    console.log(`✅ [EMAIL SENT]: Verification code ${otp} successfully delivered to ${email} (MessageId: ${info.messageId})`);
+    return { success: true, mode: 'sent', messageId: info.messageId };
   } catch (err) {
-    console.error('⚠️ [SMTP SEND ERROR]:', err.message);
-    // Even if SMTP network fails, return the OTP so the user is never blocked in testing
-    return { success: true, mode: 'console_fallback', otp };
+    console.error('❌ [SMTP SEND ERROR]:', err.message);
+    return { success: false, mode: 'error', message: err.message };
   }
 };
 

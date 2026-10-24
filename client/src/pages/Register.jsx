@@ -93,9 +93,6 @@ export default function Register() {
         password,
       });
 
-      if (response?.devOtp) {
-        setDevOtpCode(response.devOtp);
-      }
       setResendTimer(30);
       setStep("verify");
     } catch (err) {
@@ -420,23 +417,7 @@ export default function Register() {
                 <span>Change registration details</span>
               </button>
 
-              {devOtpCode && (
-                <div className="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-xs text-emerald-300 flex items-center justify-between">
-                  <span>
-                    🔑 Local Test Code:{" "}
-                    <strong className="font-mono text-sm tracking-widest text-white">
-                      {devOtpCode}
-                    </strong>
-                  </span>
-                  <button
-                    type="button"
-                    onClick={handleAutofillDevOtp}
-                    className="px-2.5 py-1 rounded bg-emerald-500 hover:bg-emerald-400 text-black font-bold text-xs cursor-pointer font-gaming uppercase tracking-wider"
-                  >
-                    Autofill Code
-                  </button>
-                </div>
-              )}
+
 
               {/* 6 Digit Inputs */}
               <div className="space-y-2">

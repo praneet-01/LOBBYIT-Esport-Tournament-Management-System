@@ -35,7 +35,15 @@ export function VoiceProvider({ children }) {
 
   // Initialize Socket.io connection once
   useEffect(() => {
-    const socket = io('http://localhost:5001', {
+    let socketUrl = 'http://localhost:5001';
+    const envUrl = import.meta.env.VITE_API_URL;
+    if (envUrl) {
+      socketUrl = envUrl.trim().replace(/\/api\/?$/, '');
+    } else if (typeof window !== 'undefined' && window.location.hostname !== 'localhost') {
+      socketUrl = window.location.origin;
+    }
+
+    const socket = io(socketUrl, {
       transports: ['websocket', 'polling'],
       autoConnect: true,
       reconnection: true,

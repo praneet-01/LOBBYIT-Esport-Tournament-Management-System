@@ -15,6 +15,7 @@ import {
   AlertCircle
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import api from '../../services/api';
 
 // Subtle Web Audio chime for instant push sound effect
 const playChimeSound = () => {
@@ -54,13 +55,8 @@ export default function NotificationBell() {
     if (!token) return;
     try {
       if (!isBackgroundPoll) setLoading(true);
-      const res = await fetch('http://localhost:5001/api/notifications', {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-      if (!res.ok) return;
-      const data = await res.json();
+      const res = await api.get('/notifications');
+      const data = res.data;
       
       const newItems = data.notifications || [];
       const newUnread = data.unreadCount || 0;
@@ -106,10 +102,7 @@ export default function NotificationBell() {
   const handleMarkAsRead = async (id, e) => {
     if (e) e.stopPropagation();
     try {
-      await fetch(`http://localhost:5001/api/notifications/${id}/read`, {
-        method: 'PATCH',
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await api.patch(`/notifications/${id}/read`);
       setNotifications((prev) =>
         prev.map((n) => (n._id === id ? { ...n, isRead: true } : n))
       );
@@ -121,10 +114,7 @@ export default function NotificationBell() {
 
   const handleMarkAllAsRead = async () => {
     try {
-      await fetch('http://localhost:5001/api/notifications/read-all', {
-        method: 'PATCH',
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await api.patch('/notifications/read-all');
       setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
       setUnreadCount(0);
     } catch (err) {

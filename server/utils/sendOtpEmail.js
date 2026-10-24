@@ -5,7 +5,8 @@ const sendOtpEmail = async ({ email, otp, purpose = 'register' }) => {
     process.env.RESEND_email_API_KEY ||
     process.env.RESEND_EMAIL_API_KEY ||
     process.env.RESEND_API_KEY ||
-    process.env.RESEND_KEY
+    process.env.RESEND_KEY ||
+    Object.entries(process.env).find(([k]) => k.toLowerCase().includes('resend'))?.[1]
   )?.trim().replace(/^["']|["']$/g, '');
 
   const smtpUser = (
@@ -79,16 +80,11 @@ const sendOtpEmail = async ({ email, otp, purpose = 'register' }) => {
       } else {
         console.error('❌ [RESEND API ERROR]:', data);
         const errMsg = data?.message || 'Resend email delivery failed';
-        // If no fallback SMTP credentials, return the error
-        if (!smtpUser || !smtpPass) {
-          return { success: false, mode: 'error', message: errMsg };
-        }
+        return { success: false, mode: 'error', message: errMsg };
       }
     } catch (resendErr) {
       console.error('❌ [RESEND NETWORK ERROR]:', resendErr.message);
-      if (!smtpUser || !smtpPass) {
-        return { success: false, mode: 'error', message: resendErr.message };
-      }
+      return { success: false, mode: 'error', message: resendErr.message };
     }
   }
 

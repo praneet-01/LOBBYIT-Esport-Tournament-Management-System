@@ -436,7 +436,7 @@ export default function TournamentDetail() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
         {/* LEFT COLUMN: ACTIVE TAB CONTENT */}
-        <div className="lg:col-span-2 space-y-6">
+        <div className="lg:col-span-2 min-w-0 space-y-6">
 
           {/* TAB: HEAD-TO-HEAD BRACKET & MATCH FIXTURES */}
           {activeMainTab === 'bracket' && (
@@ -1250,64 +1250,85 @@ export default function TournamentDetail() {
         </div>
 
         {/* RIGHT COLUMN: SPECS & ORGANIZER */}
-        <div className="space-y-6">
+        <div className="space-y-6 min-w-0">
           
           {/* Specification Card */}
-          <div className="bg-[#10141E] rounded-xl p-5 border border-white/10 space-y-4">
-            <h4 className="font-black text-white text-sm font-gaming border-b border-white/10 pb-2.5">
-              Tournament Specifications
+          <div className="bg-[#10141E] rounded-xl p-5 border border-white/10 space-y-4 shadow-md">
+            <h4 className="font-black text-white text-sm font-gaming border-b border-white/10 pb-2.5 flex items-center gap-2">
+              <Shield className="w-4 h-4 text-cyan-400" />
+              <span>Tournament Specifications</span>
             </h4>
 
             <div className="space-y-3 text-xs">
               <div className="flex items-center justify-between py-1 border-b border-white/5">
-                <span className="text-slate-400">Game Title</span>
-                <span className="font-bold text-white">{tournament.game}</span>
+                <span className="text-slate-400 flex items-center gap-2">
+                  <Gamepad2 className="w-3.5 h-3.5 text-cyan-400" /> Game Title
+                </span>
+                <span className="font-bold text-white text-right">{tournament.game}</span>
               </div>
               <div className="flex items-center justify-between py-1 border-b border-white/5">
-                <span className="text-slate-400">Platform</span>
-                <span className="font-bold text-white">{tournament.platform}</span>
+                <span className="text-slate-400 flex items-center gap-2">
+                  <Globe className="w-3.5 h-3.5 text-purple-400" /> Platform
+                </span>
+                <span className="font-bold text-white text-right">{tournament.platform}</span>
               </div>
               <div className="flex items-center justify-between py-1 border-b border-white/5">
-                <span className="text-slate-400">Format Mode</span>
-                <span className="font-bold text-white">{tournament.tournamentType}</span>
+                <span className="text-slate-400 flex items-center gap-2">
+                  <Swords className="w-3.5 h-3.5 text-amber-400" /> Format Mode
+                </span>
+                <span className="font-bold text-white text-right">{tournament.tournamentType}</span>
               </div>
               <div className="flex items-center justify-between py-1 border-b border-white/5">
-                <span className="text-slate-400">Lineup Team Size</span>
-                <span className="font-bold text-cyan-400">
+                <span className="text-slate-400 flex items-center gap-2">
+                  <Users className="w-3.5 h-3.5 text-cyan-400" /> Lineup Team Size
+                </span>
+                <span className="font-bold text-cyan-400 text-right">
                   {tournament.teamSize?.min} - {tournament.teamSize?.max} Players
                 </span>
               </div>
               <div className="flex items-center justify-between py-1 border-b border-white/5">
-                <span className="text-slate-400">Max Teams</span>
-                <span className="font-bold text-white">{tournament.maxTeams} Teams</span>
+                <span className="text-slate-400 flex items-center gap-2">
+                  <Shield className="w-3.5 h-3.5 text-slate-400" /> Max Teams
+                </span>
+                <span className="font-bold text-white text-right">{tournament.maxTeams} Teams</span>
               </div>
               <div className="flex items-center justify-between py-1 border-b border-white/5">
-                <span className="text-slate-400">Start Date</span>
-                <span className="font-bold text-emerald-400">{formattedStartDate}</span>
+                <span className="text-slate-400 flex items-center gap-2">
+                  <Calendar className="w-3.5 h-3.5 text-emerald-400" /> Start Date
+                </span>
+                <span className="font-bold text-emerald-400 text-right">{formattedStartDate}</span>
               </div>
               <div className="flex items-center justify-between py-1 border-b border-white/5">
-                <span className="text-slate-400">End Date</span>
-                <span className="font-bold text-slate-300">{formattedEndDate}</span>
+                <span className="text-slate-400 flex items-center gap-2">
+                  <Clock className="w-3.5 h-3.5 text-slate-400" /> End Date
+                </span>
+                <span className="font-bold text-slate-300 text-right">{formattedEndDate}</span>
               </div>
             </div>
           </div>
 
           {/* Organizer Card */}
-          <div className="bg-[#10141E] rounded-xl p-5 border border-white/10 space-y-3">
-            <h4 className="font-black text-white text-sm font-gaming">Organizer Details</h4>
+          <div className="bg-[#10141E] rounded-xl p-5 border border-white/10 space-y-3 shadow-md">
+            <h4 className="font-black text-white text-sm font-gaming flex items-center gap-2 border-b border-white/10 pb-2.5">
+              <Award className="w-4 h-4 text-amber-400" />
+              <span>Organizer Details</span>
+            </h4>
             <div className="flex items-center gap-3">
               <img
                 src={tournament.organizer?.avatar || `https://api.dicebear.com/7.x/identicon/svg?seed=${tournament.organizer?.username}`}
                 alt={tournament.organizer?.name}
-                className="w-10 h-10 rounded-full border border-white/15 object-cover"
+                className="w-11 h-11 rounded-full border-2 border-cyan-500/40 object-cover shadow-sm"
               />
-              <div>
-                <h5 className="font-bold text-white text-xs">{tournament.organizer?.name}</h5>
-                <p className="text-[11px] text-cyan-400 font-semibold">@{tournament.organizer?.username}</p>
+              <div className="min-w-0">
+                <h5 className="font-bold text-white text-xs truncate flex items-center gap-1.5">
+                  <span>{tournament.organizer?.name}</span>
+                  <CheckCircle2 className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                </h5>
+                <p className="text-[11px] text-cyan-400 font-semibold truncate">@{tournament.organizer?.username}</p>
               </div>
             </div>
             {tournament.organizer?.bio && (
-              <p className="text-xs text-slate-400 leading-relaxed">
+              <p className="text-xs text-slate-400 leading-relaxed pt-1">
                 {tournament.organizer.bio}
               </p>
             )}

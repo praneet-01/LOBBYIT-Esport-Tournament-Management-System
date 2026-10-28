@@ -115,50 +115,51 @@ export default function Home() {
     <div className="space-y-24 pb-20 bg-black text-slate-100 overflow-x-hidden">
       
       {/* ========================================================
-          CYBERPUNK HERO SECTION (EXACT REFERENCE LAYOUT)
+          CYBERPUNK HERO SECTION (RESPONSIVE & POLISHED)
          ======================================================== */}
       <section className="relative min-h-[92vh] sm:min-h-[96vh] lg:min-h-[98vh] flex flex-col justify-end overflow-hidden border-b border-white/10 bg-black">
         
-        {/* GIANT BACKGROUND TEXT "BATTLE" */}
-        <div className="absolute inset-x-0 top-[12%] sm:top-[14%] md:top-[16%] flex items-center justify-between px-2 sm:px-6 md:px-10 max-w-full select-none pointer-events-none z-0">
+        {/* GIANT BACKGROUND TEXT "BATTLE" (Increased Opacity as Requested) */}
+        <div className="absolute inset-x-0 top-[8%] sm:top-[12%] md:top-[15%] flex items-center justify-between px-3 sm:px-6 md:px-10 max-w-full select-none pointer-events-none z-0">
           {/* Left: BAT */}
-          <span className="text-[18vw] sm:text-[19vw] md:text-[20vw] font-black tracking-[0.02em] sm:tracking-[0.04em] text-white/5 font-gaming uppercase whitespace-nowrap leading-none translate-x-[5vw] sm:translate-x-[7vw] md:translate-x-[8vw]">
+          <span className="text-[20vw] sm:text-[19vw] md:text-[20vw] font-black tracking-normal sm:tracking-[0.03em] text-white/[0.14] sm:text-white/[0.12] md:text-white/10 font-gaming uppercase whitespace-nowrap leading-none translate-x-[2vw] sm:translate-x-[5vw] md:translate-x-[7vw]">
             BAT
           </span>
 
           {/* Right: TLE */}
-          <span className="text-[18vw] sm:text-[19vw] md:text-[20vw] font-black tracking-[0.02em] sm:tracking-[0.04em] text-white/5 font-gaming uppercase whitespace-nowrap leading-none -translate-x-[5vw] sm:-translate-x-[7vw] md:-translate-x-[8vw]">
+          <span className="text-[20vw] sm:text-[19vw] md:text-[20vw] font-black tracking-normal sm:tracking-[0.03em] text-white/[0.14] sm:text-white/[0.12] md:text-white/10 font-gaming uppercase whitespace-nowrap leading-none -translate-x-[2vw] sm:-translate-x-[5vw] md:-translate-x-[7vw]">
             TLE
           </span>
         </div>
 
-        {/* CENTER CHARACTER (Full Height Transparent Cutout, Not Hidden, True to Reference) */}
-        <div className="absolute inset-x-0 bottom-0 top-0 flex items-end justify-center pointer-events-none z-10">
+        {/* CENTER CHARACTER (Positioned gracefully on mobile to avoid text overlap) */}
+        <div className="absolute inset-x-0 bottom-0 top-0 flex items-start sm:items-end justify-center pointer-events-none z-10 pt-16 sm:pt-0">
           <img
             src="/images/hero-character-cutout.png"
             alt="Cyber Gaming Character"
-            className="h-[90vh] sm:h-[94vh] max-h-[880px] w-auto object-contain object-bottom drop-shadow-[0_20px_40px_rgba(0,0,0,0.95)]"
+            className="h-[52vh] sm:h-[68vh] md:h-[94vh] max-h-[880px] w-auto object-contain object-top sm:object-bottom drop-shadow-[0_20px_40px_rgba(0,0,0,0.95)] transition-all"
           />
-          {/* Subtle bottom fade into pure black */}
-          <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black via-black/80 to-transparent pointer-events-none"></div>
+          {/* Bottom fade into pure black so character blends smoothly behind content */}
+          <div className="absolute inset-x-0 bottom-0 h-48 sm:h-36 md:h-28 bg-gradient-to-t from-black via-black/85 to-transparent pointer-events-none"></div>
         </div>
 
-        {/* EDITORIAL CONTENT: LEFT & RIGHT (Symmetrically positioned within the side zones) */}
-        <div className="w-full mx-auto px-6 sm:px-10 lg:px-16 xl:px-20 relative z-20 pointer-events-none pt-[46vh] sm:pt-[50vh] md:pt-[52vh] pb-14 sm:pb-20">
-          <div className="flex flex-col md:flex-row items-end justify-between gap-8">
+        {/* EDITORIAL CONTENT: LEFT & RIGHT (Protected with sleek glass cards on mobile) */}
+        <div className="w-full mx-auto px-4 sm:px-8 lg:px-16 xl:px-20 relative z-20 pointer-events-none pt-[38vh] sm:pt-[44vh] md:pt-[52vh] pb-12 sm:pb-16 md:pb-20">
+          <div className="flex flex-col md:flex-row items-center md:items-end justify-between gap-4 sm:gap-6 md:gap-8">
             
             {/* Left Box (Reference: "ESPORTS ARENA") */}
-            <div className="w-full max-w-[280px] sm:max-w-[300px] lg:max-w-[320px] space-y-3 pointer-events-auto text-left">
-              <h3 className="text-base font-bold text-[#FF2E51] font-gaming uppercase tracking-widest">
+            <div className="w-full max-w-[340px] sm:max-w-[320px] p-4 sm:p-5 md:p-0 rounded-2xl md:rounded-none bg-[#0c0f18]/90 sm:bg-[#0c0f18]/85 md:bg-transparent backdrop-blur-md md:backdrop-blur-none border border-white/10 md:border-transparent shadow-2xl md:shadow-none space-y-3 pointer-events-auto text-left">
+              <h3 className="text-sm sm:text-base font-bold text-[#FF2E51] font-gaming uppercase tracking-widest flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#FF2E51] animate-pulse md:hidden" />
                 ESPORTS ARENA
               </h3>
-              <p className="text-sm text-slate-300 leading-relaxed">
+              <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
                 Enter the next dimension of competitive gaming. Squad up, compete in elite tournament brackets, and rise to championship victory.
               </p>
               <div className="pt-1">
                 <Link
                   to="/tournaments"
-                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg border border-white/20 hover:border-[#FF2E51] bg-[#10141E]/90 backdrop-blur-md text-white font-bold text-sm uppercase tracking-wider font-gaming transition-colors group"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg border border-white/20 hover:border-[#FF2E51] bg-[#10141E] md:bg-[#10141E]/90 backdrop-blur-md text-white font-bold text-xs sm:text-sm uppercase tracking-wider font-gaming transition-all group active:scale-95 shadow-md shadow-black/40"
                 >
                   <span>EXPLORE NOW</span>
                   <span className="text-[#FF2E51] font-mono tracking-tighter group-hover:translate-x-0.5 transition-transform">///</span>
@@ -167,17 +168,18 @@ export default function Home() {
             </div>
 
             {/* Right Box (Reference: "THE FUTURE") - Left Aligned */}
-            <div className="w-full max-w-[280px] sm:max-w-[300px] lg:max-w-[320px] space-y-3 pointer-events-auto text-left">
-              <h3 className="text-base font-bold text-[#FF2E51] font-gaming uppercase tracking-widest">
+            <div className="w-full max-w-[340px] sm:max-w-[320px] p-4 sm:p-5 md:p-0 rounded-2xl md:rounded-none bg-[#0c0f18]/90 sm:bg-[#0c0f18]/85 md:bg-transparent backdrop-blur-md md:backdrop-blur-none border border-white/10 md:border-transparent shadow-2xl md:shadow-none space-y-3 pointer-events-auto text-left">
+              <h3 className="text-sm sm:text-base font-bold text-[#FF2E51] font-gaming uppercase tracking-widest flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#FF2E51] animate-pulse md:hidden" />
                 THE FUTURE
               </h3>
-              <p className="text-sm text-slate-300 leading-relaxed">
+              <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
                 Automated match lobbies, live bracket progression, anti-cheat roster verification, and instant verified prize payouts.
               </p>
               <div className="pt-1 flex justify-start">
                 <Link
                   to="/register?role=Organizer"
-                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg border border-white/20 hover:border-white/40 bg-[#10141E]/90 backdrop-blur-md text-slate-200 hover:text-white font-bold text-sm uppercase tracking-wider font-gaming transition-colors"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg border border-white/20 hover:border-white/40 bg-[#10141E] md:bg-[#10141E]/90 backdrop-blur-md text-slate-200 hover:text-white font-bold text-xs sm:text-sm uppercase tracking-wider font-gaming transition-all active:scale-95 shadow-md shadow-black/40"
                 >
                   <Play className="w-3 h-3 text-[#FF2E51] fill-[#FF2E51]" />
                   <span>HOST TOURNAMENT</span>

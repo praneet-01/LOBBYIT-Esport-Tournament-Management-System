@@ -12,49 +12,6 @@ const ICE_SERVERS = {
   ]
 };
 
-// Generates a valid 1.0-second inaudible 25Hz PCM WAV Blob to hook mobile Android/iOS background audio services.
-// (25Hz is completely inaudible through phone speakers but registers above Chromium's audible threshold).
-const createSilentAudioUrl = () => {
-  if (typeof window === 'undefined') return '';
-  try {
-    const sampleRate = 8000;
-    const duration = 1.0;
-    const numSamples = Math.floor(sampleRate * duration);
-    const buffer = new ArrayBuffer(44 + numSamples);
-    const view = new DataView(buffer);
-
-    const writeStr = (offset, str) => {
-      for (let i = 0; i < str.length; i++) {
-        view.setUint8(offset + i, str.charCodeAt(i));
-      }
-    };
-
-    writeStr(0, 'RIFF');
-    view.setUint32(4, 36 + numSamples, true);
-    writeStr(8, 'WAVE');
-    writeStr(12, 'fmt ');
-    view.setUint32(16, 16, true);
-    view.setUint16(20, 1, true); // PCM
-    view.setUint16(22, 1, true); // mono
-    view.setUint32(24, sampleRate, true);
-    view.setUint32(28, sampleRate, true);
-    view.setUint16(32, 1, true);
-    view.setUint16(34, 8, true);
-    writeStr(36, 'data');
-    view.setUint32(40, numSamples, true);
-
-    for (let i = 0; i < numSamples; i++) {
-      const s = 128 + Math.round(2 * Math.sin((2 * Math.PI * 25 * i) / sampleRate));
-      view.setUint8(44 + i, s);
-    }
-
-    const blob = new Blob([buffer], { type: 'audio/wav' });
-    return URL.createObjectURL(blob);
-  } catch (e) {
-    return '';
-  }
-};
-
 export function VoiceProvider({ children }) {
   const { user } = useAuth();
 
@@ -71,7 +28,6 @@ export function VoiceProvider({ children }) {
 
   const socketRef = useRef(null);
   const localStreamRef = useRef(null);
-  const backgroundAudioRef = useRef(null);
   const peerConnectionsRef = useRef(new Map()); // socketId -> RTCPeerConnection
   const candidateQueuesRef = useRef(new Map()); // socketId -> queued RTCIceCandidateInit[]
   const audioElementsRef = useRef(new Map()); // socketId -> HTMLAudioElement
@@ -287,24 +243,6 @@ export function VoiceProvider({ children }) {
       });
       localStreamRef.current = stream;
       setupVoiceActivityDetection(stream);
-
-      // Start silent looping audio to hook Android Background Media Service & Notification Shade
-      try {
-        if (!backgroundAudioRef.current && typeof Audio !== 'undefined') {
-          const bgAudio = new Audio();
-          bgAudio.src = createSilentAudioUrl();
-          bgAudio.loop = true;
-          bgAudio.volume = 0.08; // Set above Chromium's 0.01 audible threshold to guarantee notification card display
-          backgroundAudioRef.current = bgAudio;
-        }
-        if (backgroundAudioRef.current) {
-          backgroundAudioRef.current.play().catch((bgErr) => {
-            console.warn('[Background Audio Wake Warning]:', bgErr.message);
-          });
-        }
-      } catch (wakeErr) {
-        console.warn('[Background Audio Init Warning]:', wakeErr);
-      }
 
       setRoomId(cleanRoomId);
       setRoomName(targetRoomName);
@@ -528,14 +466,6 @@ export function VoiceProvider({ children }) {
   const leaveRoom = () => {
     if (socketRef.current) {
       socketRef.current.emit('voice:leave-room');
-    }
-
-    // Stop silent background audio
-    if (backgroundAudioRef.current) {
-      try {
-        backgroundAudioRef.current.pause();
-        backgroundAudioRef.current.currentTime = 0;
-      } catch (e) {}
     }
 
     // Clear Android MediaSession Notification

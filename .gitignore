@@ -17,3 +17,10 @@ client/build/
 Thumbs.db
 .vscode/
 .idea/
+
+# Android Binaries
+*.apk
+client/android/app/build/
+client/android/.gradle/
+client/android/build/
+client/android/local.properties

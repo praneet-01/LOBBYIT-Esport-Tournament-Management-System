@@ -115,7 +115,7 @@ export default function TeamVoiceHub() {
           </div>
         )}
 
-        {/* CONNECTED STATE: Discord Full Squad Room */}
+        {/* CONNECTED STATE: Squad Room */}
         {isConnected ? (
           <div className="flex-1 flex flex-col justify-between space-y-6">
             {/* Room Header */}
@@ -151,7 +151,7 @@ export default function TeamVoiceHub() {
               <div className="flex items-center gap-2">
                 <button
                   onClick={handleCopyInvite}
-                  className="px-4 py-2 rounded-xl bg-[#171E30] hover:bg-[#1E263C] text-slate-200 hover:text-white border border-white/10 text-xs font-bold flex items-center gap-2 transition-all shadow-sm"
+                  className="px-4 py-2 rounded-xl bg-[#171E30] hover:bg-[#1E263C] text-slate-200 hover:text-white border border-white/10 text-xs font-bold flex items-center gap-2 transition-all shadow-sm cursor-pointer"
                 >
                   {copied ? (
                     <>
@@ -166,51 +166,37 @@ export default function TeamVoiceHub() {
               </div>
             </div>
 
-            {/* Mobile Game Mode & Notification Bar Sync Banner */}
-            <div className="p-4 rounded-2xl bg-gradient-to-r from-[#0C1527] via-[#0F1A30] to-[#0C1527] border border-cyan-500/30 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-xl">
-              <div className="flex items-start gap-3">
-                <div className="p-2.5 rounded-xl bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 shrink-0 mt-0.5">
+            {/* Custom Match Credentials Bar */}
+            <div className="p-4 rounded-2xl bg-[#0F1420] border border-white/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-xl">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-xl bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 shrink-0">
                   <Gamepad2 className="w-5 h-5" />
                 </div>
                 <div>
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-xs font-black text-white uppercase tracking-wider font-gaming">
-                      Mobile Game Background Mode Active
-                    </span>
-                    <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
-                      ⚡ Swipe-Down Drawer Enabled
-                    </span>
-                  </div>
-                  <p className="text-xs text-slate-300 mt-1">
-                    You can switch to <strong>BGMI</strong> now. Audio will continue in the background. Swipe down your notification bar to mute or view match credentials.
-                  </p>
-                  <p className="text-[11px] text-amber-400/90 mt-1 font-medium">
-                    ⚠️ Tip: Set in-game BGMI microphone to <strong>MUTE</strong> so your browser retains hardware mic priority.
+                  <h4 className="text-xs font-bold text-white uppercase tracking-wider font-gaming">
+                    Custom Match Credentials
+                  </h4>
+                  <p className="text-[11px] text-slate-400 mt-0.5">
+                    Enter tournament room details to share with squad members.
                   </p>
                 </div>
               </div>
 
-              {/* Quick Match Credentials Inputs for Notification Shade Sync */}
-              <div className="w-full md:w-auto shrink-0 bg-black/40 p-3 rounded-xl border border-white/10 flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-                <div className="text-[11px] font-bold text-slate-300 uppercase tracking-wider whitespace-nowrap">
-                  Custom Match Info:
-                </div>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="text"
-                    placeholder="Custom Room ID"
-                    value={roomCredentials?.customRoomId || ''}
-                    onChange={(e) => setRoomCredentials(prev => ({ ...prev, customRoomId: e.target.value }))}
-                    className="px-3 py-1.5 rounded-lg bg-[#090C13] border border-white/15 text-white placeholder-slate-500 text-xs font-mono w-28 focus:outline-none focus:border-cyan-500"
-                  />
-                  <input
-                    type="text"
-                    placeholder="Room Pass"
-                    value={roomCredentials?.customPassword || ''}
-                    onChange={(e) => setRoomCredentials(prev => ({ ...prev, customPassword: e.target.value }))}
-                    className="px-3 py-1.5 rounded-lg bg-[#090C13] border border-white/15 text-white placeholder-slate-500 text-xs font-mono w-24 focus:outline-none focus:border-cyan-500"
-                  />
-                </div>
+              <div className="flex items-center gap-2 w-full sm:w-auto">
+                <input
+                  type="text"
+                  placeholder="Custom Room ID"
+                  value={roomCredentials?.customRoomId || ''}
+                  onChange={(e) => setRoomCredentials(prev => ({ ...prev, customRoomId: e.target.value }))}
+                  className="px-3 py-1.5 rounded-lg bg-[#090C13] border border-white/15 text-white placeholder-slate-500 text-xs font-mono w-28 focus:outline-none focus:border-cyan-500"
+                />
+                <input
+                  type="text"
+                  placeholder="Room Pass"
+                  value={roomCredentials?.customPassword || ''}
+                  onChange={(e) => setRoomCredentials(prev => ({ ...prev, customPassword: e.target.value }))}
+                  className="px-3 py-1.5 rounded-lg bg-[#090C13] border border-white/15 text-white placeholder-slate-500 text-xs font-mono w-24 focus:outline-none focus:border-cyan-500"
+                />
               </div>
             </div>
 
@@ -391,8 +377,8 @@ export default function TeamVoiceHub() {
               <h2 className="text-2xl font-black text-white font-gaming tracking-wide uppercase">
                 Squad Voice Comms
               </h2>
-              <p className="text-xs text-slate-400">
-                Ultra-low latency Discord-style voice chat for teammates. Runs seamlessly in the background with zero game lag.
+              <p className="text-xs text-slate-300">
+                High-performance tactical squad communications engineered for esports tournaments. Crystal-clear P2P audio with zero game lag.
               </p>
             </div>
 

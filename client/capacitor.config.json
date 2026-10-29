@@ -3,12 +3,7 @@
   "appName": "Kriditam",
   "webDir": "dist",
   "server": {
-    "androidScheme": "https",
+    "url": "https://lobbyit-esport-tournament-managemen.vercel.app",
     "cleartext": true
-  },
-  "plugins": {
-    "CapacitorHttp": {
-      "enabled": true
-    }
   }
 }

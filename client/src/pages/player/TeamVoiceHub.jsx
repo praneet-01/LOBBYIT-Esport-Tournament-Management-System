@@ -28,6 +28,8 @@ export default function TeamVoiceHub() {
   const { 
     roomId, 
     roomName, 
+    roomCredentials,
+    setRoomCredentials,
     isConnected, 
     peers, 
     isMuted, 
@@ -161,6 +163,54 @@ export default function TeamVoiceHub() {
                     </>
                   )}
                 </button>
+              </div>
+            </div>
+
+            {/* Mobile Game Mode & Notification Bar Sync Banner */}
+            <div className="p-4 rounded-2xl bg-gradient-to-r from-[#0C1527] via-[#0F1A30] to-[#0C1527] border border-cyan-500/30 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-xl">
+              <div className="flex items-start gap-3">
+                <div className="p-2.5 rounded-xl bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 shrink-0 mt-0.5">
+                  <Gamepad2 className="w-5 h-5" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-xs font-black text-white uppercase tracking-wider font-gaming">
+                      Mobile Game Background Mode Active
+                    </span>
+                    <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
+                      ⚡ Swipe-Down Drawer Enabled
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-300 mt-1">
+                    You can switch to <strong>BGMI</strong> now. Audio will continue in the background. Swipe down your notification bar to mute or view match credentials.
+                  </p>
+                  <p className="text-[11px] text-amber-400/90 mt-1 font-medium">
+                    ⚠️ Tip: Set in-game BGMI microphone to <strong>MUTE</strong> so your browser retains hardware mic priority.
+                  </p>
+                </div>
+              </div>
+
+              {/* Quick Match Credentials Inputs for Notification Shade Sync */}
+              <div className="w-full md:w-auto shrink-0 bg-black/40 p-3 rounded-xl border border-white/10 flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                <div className="text-[11px] font-bold text-slate-300 uppercase tracking-wider whitespace-nowrap">
+                  Custom Match Info:
+                </div>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    placeholder="Custom Room ID"
+                    value={roomCredentials?.customRoomId || ''}
+                    onChange={(e) => setRoomCredentials(prev => ({ ...prev, customRoomId: e.target.value }))}
+                    className="px-3 py-1.5 rounded-lg bg-[#090C13] border border-white/15 text-white placeholder-slate-500 text-xs font-mono w-28 focus:outline-none focus:border-cyan-500"
+                  />
+                  <input
+                    type="text"
+                    placeholder="Room Pass"
+                    value={roomCredentials?.customPassword || ''}
+                    onChange={(e) => setRoomCredentials(prev => ({ ...prev, customPassword: e.target.value }))}
+                    className="px-3 py-1.5 rounded-lg bg-[#090C13] border border-white/15 text-white placeholder-slate-500 text-xs font-mono w-24 focus:outline-none focus:border-cyan-500"
+                  />
+                </div>
               </div>
             </div>
 

@@ -12,11 +12,15 @@ const ICE_SERVERS = {
   ]
 };
 
+// Minimal valid 1-second silent WAV base64 to maintain mobile Android/iOS background audio service
+const SILENT_AUDIO_WAV = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA';
+
 export function VoiceProvider({ children }) {
   const { user } = useAuth();
 
   const [roomId, setRoomId] = useState(null);
   const [roomName, setRoomName] = useState('');
+  const [roomCredentials, setRoomCredentials] = useState({ customRoomId: '', customPassword: '' });
   const [isConnected, setIsConnected] = useState(false);
   const [peers, setPeers] = useState(new Map()); // socketId -> peerObj
   const [isMuted, setIsMuted] = useState(false);
@@ -27,6 +31,7 @@ export function VoiceProvider({ children }) {
 
   const socketRef = useRef(null);
   const localStreamRef = useRef(null);
+  const backgroundAudioRef = useRef(null);
   const peerConnectionsRef = useRef(new Map()); // socketId -> RTCPeerConnection
   const candidateQueuesRef = useRef(new Map()); // socketId -> queued RTCIceCandidateInit[]
   const audioElementsRef = useRef(new Map()); // socketId -> HTMLAudioElement
@@ -210,7 +215,7 @@ export function VoiceProvider({ children }) {
   };
 
   // Join a Squad Voice Room
-  const joinRoom = async (targetRoomId, targetRoomName = 'Squad Voice') => {
+  const joinRoom = async (targetRoomId, targetRoomName = 'Squad Voice', credentials = null) => {
     if (!user) {
       setError('Please log in to join squad voice');
       return;
@@ -221,6 +226,13 @@ export function VoiceProvider({ children }) {
     if (!cleanRoomId) {
       setError('Invalid room code. Please provide a valid squad code.');
       return;
+    }
+
+    if (credentials) {
+      setRoomCredentials({
+        customRoomId: credentials.customRoomId || credentials.roomId || '',
+        customPassword: credentials.customPassword || credentials.password || ''
+      });
     }
 
     try {
@@ -235,6 +247,23 @@ export function VoiceProvider({ children }) {
       });
       localStreamRef.current = stream;
       setupVoiceActivityDetection(stream);
+
+      // Start silent looping audio to hook Android Background Media Service & Notification Shade
+      try {
+        if (!backgroundAudioRef.current && typeof Audio !== 'undefined') {
+          const bgAudio = new Audio(SILENT_AUDIO_WAV);
+          bgAudio.loop = true;
+          bgAudio.volume = 0.0001;
+          backgroundAudioRef.current = bgAudio;
+        }
+        if (backgroundAudioRef.current) {
+          backgroundAudioRef.current.play().catch((bgErr) => {
+            console.warn('[Background Audio Wake Warning]:', bgErr.message);
+          });
+        }
+      } catch (wakeErr) {
+        console.warn('[Background Audio Init Warning]:', wakeErr);
+      }
 
       setRoomId(cleanRoomId);
       setRoomName(targetRoomName);
@@ -460,6 +489,22 @@ export function VoiceProvider({ children }) {
       socketRef.current.emit('voice:leave-room');
     }
 
+    // Stop silent background audio
+    if (backgroundAudioRef.current) {
+      try {
+        backgroundAudioRef.current.pause();
+        backgroundAudioRef.current.currentTime = 0;
+      } catch (e) {}
+    }
+
+    // Clear Android MediaSession Notification
+    if (typeof window !== 'undefined' && 'mediaSession' in navigator) {
+      try {
+        navigator.mediaSession.metadata = null;
+        navigator.mediaSession.playbackState = 'none';
+      } catch (e) {}
+    }
+
     // Stop and release mic tracks
     if (localStreamRef.current) {
       localStreamRef.current.getTracks().forEach((track) => track.stop());
@@ -485,6 +530,7 @@ export function VoiceProvider({ children }) {
 
     setRoomId(null);
     setRoomName('');
+    setRoomCredentials({ customRoomId: '', customPassword: '' });
     setIsConnected(false);
     setPeers(new Map());
     setIsSpeaking(false);
@@ -492,11 +538,77 @@ export function VoiceProvider({ children }) {
     setIsDeafened(false);
   };
 
+  // Keep latest refs to avoid stale closures in Android MediaSession action callbacks
+  const isMutedRef = useRef(isMuted);
+  isMutedRef.current = isMuted;
+
+  const toggleMuteRef = useRef(toggleMute);
+  toggleMuteRef.current = toggleMute;
+
+  const toggleDeafenRef = useRef(toggleDeafen);
+  toggleDeafenRef.current = toggleDeafen;
+
+  const leaveRoomRef = useRef(leaveRoom);
+  leaveRoomRef.current = leaveRoom;
+
+  // Sync Android MediaSession Notification Controls
+  useEffect(() => {
+    if (typeof window === 'undefined' || !('mediaSession' in navigator)) return;
+
+    if (isConnected) {
+      const activeMembers = 1 + peers.size;
+      const credsText = roomCredentials?.customRoomId
+        ? `Room: #${roomCredentials.customRoomId}${roomCredentials.customPassword ? ' | Pass: ' + roomCredentials.customPassword : ''}`
+        : `Room Code: ${roomId || 'Active'}`;
+
+      try {
+        navigator.mediaSession.metadata = new MediaMetadata({
+          title: roomName || 'LobbyIT Squad Comms',
+          artist: credsText,
+          album: `${isMuted ? '🔴 Mic Muted' : '🟢 Mic LIVE'} • ${activeMembers} in squad`,
+          artwork: [
+            { src: '/images/lobbyit-icon.png', sizes: '96x96', type: 'image/png' },
+            { src: '/images/lobbyit-icon.png', sizes: '192x192', type: 'image/png' },
+            { src: '/images/lobbyit-icon.png', sizes: '512x512', type: 'image/png' },
+            { src: '/favicon.png', sizes: '128x128', type: 'image/png' }
+          ]
+        });
+
+        navigator.mediaSession.playbackState = isMuted ? 'paused' : 'playing';
+
+        navigator.mediaSession.setActionHandler('play', () => {
+          if (isMutedRef.current) toggleMuteRef.current();
+        });
+        navigator.mediaSession.setActionHandler('pause', () => {
+          if (!isMutedRef.current) toggleMuteRef.current();
+        });
+        navigator.mediaSession.setActionHandler('stop', () => {
+          leaveRoomRef.current();
+        });
+        navigator.mediaSession.setActionHandler('nexttrack', () => {
+          toggleDeafenRef.current();
+        });
+        navigator.mediaSession.setActionHandler('previoustrack', () => {
+          toggleMuteRef.current();
+        });
+      } catch (err) {
+        console.warn('[MediaSession Registration Warning]:', err);
+      }
+    } else {
+      try {
+        navigator.mediaSession.metadata = null;
+        navigator.mediaSession.playbackState = 'none';
+      } catch (e) {}
+    }
+  }, [isConnected, isMuted, isDeafened, roomId, roomName, peers.size, roomCredentials]);
+
   return (
     <VoiceContext.Provider
       value={{
         roomId,
         roomName,
+        roomCredentials,
+        setRoomCredentials,
         isConnected,
         peers,
         isMuted,
